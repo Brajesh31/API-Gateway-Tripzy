@@ -1,0 +1,22 @@
+flowchart TD
+  A([Processing step]) --> B{Failure?}
+  B -->|No| C[Continue request]
+  B -->|Yes| D[Classify failure]
+  D --> E{Client input or policy?}
+  E -->|Malformed input| E400[400 / 413]
+  E -->|Identity invalid| E401[401]
+  E -->|Permission denied| E403[403]
+  E -->|Quota exceeded| E429[429]
+  E -->|Unknown route| E404[404]
+  E -->|Upstream failure| F{Timeout?}
+  F -->|Yes| E504[504]
+  F -->|No| E502[502 / 503]
+  E400 --> G[Build stable public error envelope]
+  E401 --> G
+  E403 --> G
+  E429 --> G
+  E404 --> G
+  E504 --> G
+  E502 --> G
+  G --> H[Record sanitized diagnostic event]
+  H --> I([Respond with correlation ID])
