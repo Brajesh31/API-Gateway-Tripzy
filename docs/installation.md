@@ -1,53 +1,81 @@
-# 📦 Installation and local setup
+# 📦 Installation and local development setup
 
-## Current state
+## 1. What this installation currently provides
 
-This is a Node.js package and documentation scaffold. No gateway server exists. The manifest contains no runtime dependencies and the test script is a placeholder that exits with status 1.
+This repository is a Node.js package and documentation foundation. The current package manifest declares Node.js 20 or later and ES modules, but there is no gateway server, runtime framework, upstream client, or application source. Installing the package does not start an API.
 
-## Prerequisites
+## 2. Prerequisites
 
-- Git.
-- Supported Node.js LTS.
-- npm.
-- Confirmed Tripzy contracts before defining upstream configuration.
+| Tool | Requirement | Purpose |
+|---|---|---|
+| Git | Recent version | Clone and branch management |
+| Node.js | 20 or later | Declared future runtime baseline |
+| npm | Bundled with supported Node.js | Package management |
+| Editor | Any ESM/Markdown-capable editor | Source and documentation work |
+| Mock service | Required for future integration work | Safe upstream simulation |
 
-## Clone
+## 3. Clone the repository
 
-```bash
+~~~bash
 git clone https://github.com/Brajesh31/API-Gateway-Tripzy.git
 cd API-Gateway-Tripzy
-```
+~~~
 
-## Install package metadata
+## 4. Install package metadata
 
-```bash
+~~~bash
 npm install
-```
+~~~
 
-No runtime dependency is currently required by the manifest.
+The current package manifest has no runtime or development dependencies. npm may create a lockfile locally when installing. Review any generated lockfile before committing it.
 
-## Current scripts
+## 5. Current npm scripts
 
-| Command | Behavior |
+| Command | Current result |
 |---|---|
-| `npm test` | Placeholder, exits with error |
-| `npm start` | Not configured |
-| `npm run dev` | Not configured |
-| `npm run lint` | Not configured |
+| npm install | Installs the currently declared dependency tree |
+| npm test | Intentionally exits with a placeholder message |
+| npm start | Not configured |
+| npm run dev | Not configured |
+| npm run lint | Not configured |
+| npm run build | Not configured |
 
-Do not expect a production startup until a server implementation and environment validation have been added.
+Do not treat the absence of a startup command as an installation failure. It reflects the missing runtime implementation.
 
-## Environment file
+## 6. Environment configuration
 
-`.env.example` lists planned settings. No dotenv loader or config module exists, so copying it to `.env` has no runtime effect at this stage.
+The root .env.example lists proposed settings. There is no dotenv dependency or configuration loader, so creating a .env file does not affect any application process today.
 
-## Next implementation steps
+Never put real credentials in the sample file. Use reserved example values and an ignored local file only after the runtime loader is implemented.
 
-1. Confirm service owners and versioned contracts.
-2. Select Node.js LTS and HTTP framework.
-3. Add server composition and health/readiness endpoints.
-4. Add validated environment loading and safe logging.
-5. Add explicit route registry and mock-upstream tests.
-6. Add authentication and authorization.
-7. Add timeouts, quotas and outbound allowlists.
-8. Add deployment configuration and security tests.
+## 7. Future local integration environment
+
+When the gateway exists, local development should use:
+- A deterministic test identity provider or local signing keys.
+- Local mock upstream HTTP servers.
+- Synthetic user and request data.
+- Separate ports for the gateway and mock services.
+- No production credentials or customer records.
+
+## 8. Troubleshooting installation
+
+### Node version mismatch
+
+Check node --version and use the repository's declared runtime requirement. Avoid silently switching to an unsupported runtime.
+
+### npm audit reports an issue
+
+Inspect the dependency tree and advisory. Do not hide a high/critical finding by lowering the audit threshold. Since the current manifest has no dependencies, new runtime dependencies should be introduced with explicit review.
+
+### npm test exits with an error
+
+Expected until a real test suite is added. The placeholder prevents an empty test command from being mistaken for verification.
+
+## 9. Setup verification checklist
+
+- [ ] Git clone completed.
+- [ ] Node.js version satisfies package engines.
+- [ ] npm install completes.
+- [ ] No production secret was added to the working tree.
+- [ ] No one assumes a gateway server exists.
+- [ ] New runtime dependencies are justified and documented.
