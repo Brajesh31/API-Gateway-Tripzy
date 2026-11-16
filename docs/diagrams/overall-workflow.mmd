@@ -1,0 +1,21 @@
+flowchart TD
+  A([Client request]) --> B[Edge accepts HTTPS]
+  B --> C[Gateway validates request framing]
+  C --> D[Create trusted request context]
+  D --> E[Resolve public method and path]
+  E --> F{Route registered?}
+  F -->|No| X404[404 route not found]
+  F -->|Yes| G[Verify identity when required]
+  G --> H{Identity valid?}
+  H -->|No| X401[401 unauthenticated]
+  H -->|Yes| I[Evaluate route permission]
+  I --> J{Allowed?}
+  J -->|No| X403[403 forbidden]
+  J -->|Yes| K[Check quota and concurrency]
+  K --> L{Within policy?}
+  L -->|No| X429[429 rate limited]
+  L -->|Yes| M[Resolve fixed upstream]
+  M --> N[Forward filtered request with deadline]
+  N --> O[Normalize response or failure]
+  O --> P[Emit redacted telemetry]
+  P --> Q([Return public response])
