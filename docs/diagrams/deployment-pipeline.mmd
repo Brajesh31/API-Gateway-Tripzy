@@ -1,0 +1,17 @@
+flowchart TD
+  A[Reviewed commit] --> B[Checkout and toolchain]
+  B --> C[Static and documentation checks]
+  C --> D[Unit and contract tests]
+  D --> E[Dependency and secret checks]
+  E --> F{All required gates pass?}
+  F -->|No| G[Fail workflow and fix]
+  F -->|Yes| H[Build immutable artifact]
+  H --> I[Deploy isolated staging]
+  I --> J[Smoke and integration checks]
+  J --> K{Release approved?}
+  K -->|No| L[Stop and investigate]
+  K -->|Yes| M[Canary production]
+  M --> N[Observe latency, errors and saturation]
+  N --> O{Healthy?}
+  O -->|No| P[Rollback]
+  O -->|Yes| Q[Complete rollout]
