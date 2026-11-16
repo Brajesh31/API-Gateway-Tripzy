@@ -1,22 +1,25 @@
-# 🧨 Threat model
+# 🧨 Threat model and abuse-case analysis
 
-## Scope
+> This is a design-level threat model, not a penetration test. Runtime code is absent, so every mitigation below remains a requirement until implemented and tested.
 
-This model addresses the proposed API gateway. It is not a penetration test. Since runtime code is absent, mitigations are requirements, not verified defenses.
+## 1. Scope and assumptions
 
-## Assets
+The proposed system accepts HTTP requests from external clients, verifies identity, evaluates route policy, and forwards approved requests to internal services. Actual Tripzy service topology, identity provider, network configuration, and deployment platform are not yet confirmed.
 
-- Client identity and permission claims.
+## 2. Assets
+
+- User/client identity and permission claims.
 - Service-to-service credentials.
 - Trusted upstream destination registry.
 - Upstream service availability and data integrity.
-- Public API contracts.
-- Logs, metrics and traces.
+- Public API contracts and compatibility guarantees.
+- Logs, metrics, traces, and security audit events.
 - CI/CD credentials and release artifacts.
+- Configuration and signing-key metadata.
 
-## Trust boundaries
+## 3. Trust boundaries
 
-```mermaid
+~~~mermaid
 flowchart LR
   Client[Untrusted client] --> Edge[Public edge]
   Edge --> Gateway[Gateway boundary]
@@ -26,44 +29,66 @@ flowchart LR
   Gateway --> Telemetry[Restricted observability]
   CI[CI identity] --> Artifact[Build artifact]
   Artifact --> Runtime[Deployment environment]
-```
+  Secrets[Secret manager] -. controlled access .-> Gateway
+~~~
 
-## Threat register
+## 4. Threat register
 
-| Threat | Example | Required mitigation |
+| Threat | Attack path | Impact | Required mitigation |
+|---|---|---|---|
+| Broken authentication | Forged, expired, or wrong-audience token accepted | Impersonation | Signature and claim verification |
+| Broken authorization | Caller accesses another user's resource | Data exposure | Route permissions plus service object checks |
+| SSRF | Caller controls upstream host or redirect | Internal network access | Fixed registry, DNS/redirect checks, egress policy |
+| Open proxy | Arbitrary URL forwarding endpoint | Abuse and internal scanning | No client-selected destinations |
+| Header spoofing | Fake user/role/tenant header | Privilege escalation | Strip and recreate trusted headers |
+| Request smuggling | Edge and app parse request differently | Policy bypass | Consistent parser/proxy behavior and regression tests |
+| Denial of service | Large bodies, slow clients, unbounded concurrency | Availability loss | Size/time/concurrency limits and quotas |
+| Retry storm | Outage causes repeated upstream calls | Cascading failure | Retry budget and idempotency checks |
+| Information disclosure | Raw upstream exception returned | Internal detail exposure | Stable public errors and redaction |
+| Dependency compromise | Vulnerable or malicious package/action | Runtime or CI compromise | Lockfile, audit, review, pinned actions |
+| Misconfiguration | Route points to unintended service | Data leakage | Startup validation and route approval |
+| Telemetry leakage | Logs include token or private payload | Credential/privacy exposure | Redaction, access control and retention |
+
+## 5. Abuse-case walkthroughs
+
+### A. Destination injection
+
+An attacker submits a URL in a query parameter or body and attempts to make the gateway contact a metadata endpoint. The request must never influence the destination selection. The gateway resolves a service ID from the fixed route registry and applies network egress restrictions.
+
+### B. Identity header spoofing
+
+An attacker sends X-User-Id or X-Role with an elevated value. The gateway strips these headers and creates a trusted context only from verified credentials. The upstream must authenticate the gateway and apply its own resource authorization.
+
+### C. Retry after uncertain mutation
+
+A mutation reaches the service, commits, and then loses its response. The gateway must not assume the operation failed. A retry is allowed only when the route contract provides idempotency semantics.
+
+### D. Telemetry secret leakage
+
+An exception contains an Authorization header or query value. The logging layer must redact sensitive fields before serialization. Tests should inspect emitted logs, not only HTTP responses.
+
+## 6. Security test catalogue
+
+- Missing, malformed, expired, wrong-issuer, wrong-audience, wrong-algorithm, and invalid-signature tokens.
+- Valid identity with insufficient permission.
+- Cross-user and cross-tenant resource access.
+- Spoofed identity headers.
+- Unknown route and unregistered service ID.
+- URL schemes, ports, private addresses, metadata endpoints, DNS rebinding, and redirects.
+- Chunked, compressed, malformed, and oversized request bodies.
+- Oversized upstream response and slow streaming.
+- Mutation timeout with uncertain upstream outcome.
+- Log and trace redaction.
+- Dependency/workflow permission regression.
+
+## 7. Risk priority
+
+| Priority | Examples | Release impact |
 |---|---|---|
-| Broken authentication | Forged/expired token accepted | Signature, issuer, audience, expiry verification |
-| Broken authorization | Caller reads another user's record | Route permissions and service-level object checks |
-| SSRF | Caller controls upstream host | Fixed registry and outbound network policy |
-| Open proxy | Arbitrary URL forwarding | No client-selected destinations |
-| Header spoofing | Fake role/user header | Strip and recreate only from verified claims |
-| Request smuggling | Edge and gateway parse differently | Consistent proxy/parser config and regression tests |
-| Denial of service | Large bodies/concurrency exhaust process | Body/header/time/concurrency limits and quotas |
-| Retry storm | Outage creates repeated calls | Bounded budgets and idempotency checks |
-| Information leakage | Raw token/upstream error is returned | Redaction and normalized error mapping |
-| Dependency compromise | Vulnerable package is introduced | Lockfile, audit, review, pinned workflows |
-| Misconfiguration | Route points to unintended service | Startup validation and deployment review |
-| Telemetry leakage | Logs expose personal data | Redaction, access control and retention |
+| P0 | Authentication, authorization, SSRF, destination allowlist, secret exposure, request limits | Blocks internet exposure |
+| P1 | Contract tests, telemetry redaction, concurrency isolation, incident runbooks | Blocks general availability |
+| P2 | Independent assessment, chaos testing, formal SLO/error budget | Maturity work |
 
-## Abuse cases to test
+## 8. Residual risk and ownership
 
-- Missing/invalid token on protected routes.
-- Wrong issuer, audience, algorithm, signature or scope.
-- Cross-user resource request.
-- Spoofed identity header with low-privilege token.
-- Arbitrary scheme, hostname, port or redirect.
-- Compressed/chunked body over limit.
-- Slow upstream consumes connection pool.
-- Mutation is retried after uncertain outcome.
-- Upstream returns oversized response.
-- Redirect targets internal network.
-
-## Priorities
-
-**P0 before internet exposure:** authentication, authorization, trusted upstream allowlist, SSRF protections, rate/body/time limits, credential management.
-
-**P1 before general availability:** contract tests, redacted telemetry, metrics, concurrency isolation, dependency scanning and incident runbooks.
-
-**P2 maturity:** independent security assessment, chaos testing, routine access review and formal SLO/error-budget process.
-
-A gateway cannot replace the domain service's own resource-level authorization. Internal services must authenticate the gateway identity and protect their data independently.
+Each accepted risk must have a named owner, rationale, compensating control, and review date. Do not mark a mitigation complete until implementation evidence and regression tests exist. Internal services must not assume that gateway route authorization replaces their own resource-level access checks.
