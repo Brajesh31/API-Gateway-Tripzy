@@ -1,0 +1,35 @@
+name: "✨ Feature request"
+description: Propose a gateway capability or improvement.
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User or operator problem
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and contracts
+    validations:
+      required: true
+  - type: textarea
+    id: ownership
+    attributes:
+      label: Verified service owner and affected routes
+      description: Do not publish private URLs.
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and privacy impact
+      description: Consider authentication, authorization, SSRF, abuse and retention.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Testable acceptance criteria
+    validations:
+      required: true
