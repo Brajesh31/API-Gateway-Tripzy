@@ -13,6 +13,16 @@
     <img src="https://img.shields.io/badge/Version-0.1.0-blue.svg" alt="Version 0.1.0" />
     <a href="https://github.com/Brajesh31/API-Gateway-Tripzy/commits/main"><img src="https://img.shields.io/github/last-commit/Brajesh31/API-Gateway-Tripzy?logo=github" alt="Last commit" /></a>
     <a href="https://github.com/Brajesh31/API-Gateway-Tripzy"><img src="https://img.shields.io/github/repo-size/Brajesh31/API-Gateway-Tripzy?logo=github" alt="Repository size" /></a>
+    <a href="https://github.com/Brajesh31/API-Gateway-Tripzy/stargazers"><img src="https://img.shields.io/github/stars/Brajesh31/API-Gateway-Tripzy?style=flat&logo=github" alt="GitHub stars" /></a>
+    <a href="https://github.com/Brajesh31/API-Gateway-Tripzy/network/members"><img src="https://img.shields.io/github/forks/Brajesh31/API-Gateway-Tripzy?style=flat&logo=github" alt="GitHub forks" /></a>
+    <a href="https://github.com/Brajesh31/API-Gateway-Tripzy/issues"><img src="https://img.shields.io/github/issues/Brajesh31/API-Gateway-Tripzy?style=flat&logo=github" alt="Open issues" /></a>
+    <a href="https://github.com/Brajesh31/API-Gateway-Tripzy/graphs/contributors"><img src="https://img.shields.io/github/contributors/Brajesh31/API-Gateway-Tripzy?style=flat&logo=github" alt="Contributors" /></a>
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/topic-api--gateway-2563eb.svg" alt="Topic: API gateway" />
+    <img src="https://img.shields.io/badge/topic-microservices-0f766e.svg" alt="Topic: microservices" />
+    <img src="https://img.shields.io/badge/topic-nodejs-339933.svg" alt="Topic: Node.js" />
+    <img src="https://img.shields.io/badge/topic-tripzy-7c3aed.svg" alt="Topic: Tripzy" />
   </p>
   <p>
     <a href="#-project-status-read-this-first">Project status</a> ·
