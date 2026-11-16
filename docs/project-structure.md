@@ -8,7 +8,36 @@ This document is generated from the current default-branch file tree. It describ
 
 ~~~text
 API-Gateway-Tripzy/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml
+│   │   ├── config.yml
+│   │   ├── documentation.yml
+│   │   ├── feature_request.yml
+│   │   ├── performance.yml
+│   │   └── question.yml
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   ├── documentation.yml
+│   │   ├── security.yml
+│   │   └── update-readme.yml
+│   ├── dependabot.yml
+│   └── PULL_REQUEST_TEMPLATE.md
+├── .idea/
+│   └── .gitignore
+├── assets/
+│   ├── banners/
+│   │   └── api-gateway-tripzy.svg
+│   ├── diagrams/
+│   │   └── gateway-architecture.svg
+│   ├── illustrations/
+│   │   └── request-security-flow.svg
+│   └── README.md
 ├── docs/
+│   ├── ADRs/
+│   │   ├── 0001-gateway-boundary-and-service-ownership.md
+│   │   ├── README.md
+│   │   └── template.md
 │   ├── diagrams/
 │   │   ├── api-request-sequence.mmd
 │   │   ├── authentication-authorization.mmd
@@ -24,10 +53,6 @@ API-Gateway-Tripzy/
 │   │   ├── request-lifecycle.mmd
 │   │   ├── service-registration.mmd
 │   │   └── target-architecture.mmd
-│   ├── ADRs/
-│   │   ├── 0001-gateway-boundary-and-service-ownership.md
-│   │   ├── README.md
-│   │   └── template.md
 │   ├── accessibility.md
 │   ├── api.md
 │   ├── architecture.md
@@ -76,31 +101,6 @@ API-Gateway-Tripzy/
 │   ├── usage.md
 │   ├── versioning-and-compatibility.md
 │   └── workflow.md
-├── .idea/
-│   └── .gitignore
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml
-│   │   ├── documentation.yml
-│   │   ├── security.yml
-│   │   └── update-readme.yml
-│   ├── ISSUE_TEMPLATE/
-│   │   ├── bug_report.yml
-│   │   ├── config.yml
-│   │   ├── documentation.yml
-│   │   ├── feature_request.yml
-│   │   ├── performance.yml
-│   │   └── question.yml
-│   ├── dependabot.yml
-│   └── PULL_REQUEST_TEMPLATE.md
-├── assets/
-│   ├── banners/
-│   │   └── api-gateway-tripzy.svg
-│   ├── diagrams/
-│   │   └── gateway-architecture.svg
-│   ├── illustrations/
-│   │   └── request-security-flow.svg
-│   └── README.md
 ├── .editorconfig
 ├── .env.example
 ├── .gitattributes
