@@ -1,22 +1,16 @@
 # 🧾 Upstream service contract register
 
-## Purpose
-
-The gateway must route only to known Tripzy services. This register is the review point for service ownership, public routes, upstream destinations, authentication, failure budgets, and contract tests.
-
 ## Current state
 
-No upstream services or URLs are configured in this repository. Do not infer service names or endpoints from the product name. Service details remain undecided until confirmed by their owners.
+No upstream service names or URLs are confirmed or configured in this repository. Do not infer microservice boundaries from the Tripzy product name.
 
 ## Service register
 
-| Service ID | Owner | Base URL key | Public routes | Auth model | Timeout | Status |
+| Service ID | Owner | Destination key | Public routes | Auth model | Timeout | Status |
 |---|---|---|---|---|---|---|
 | None registered | TBD | TBD | None | TBD | TBD | Not configured |
 
 ## Route registration template
-
-Copy this template for each approved route:
 
 ```yaml
 routeId: example-read
@@ -48,44 +42,41 @@ This is a template, not active configuration.
 
 ## Required owner confirmation
 
-Before a service is registered, collect:
-1. Service name and technical owner.
-2. Internal base URL and network exposure rules.
-3. Allowed methods and paths.
-4. Token validation and service-to-service identity requirements.
-5. Permission/scopes and resource-level authorization requirements.
-6. Expected request and response schema.
-7. Maximum payload and upload behavior.
-8. Expected latency and timeout budget.
+1. Service ID and technical owner.
+2. Internal base URL and network boundary.
+3. Methods and paths permitted.
+4. Token validation/service identity requirements.
+5. Permission scopes and resource-level authorization.
+6. Request and response schemas.
+7. Payload size and upload behavior.
+8. Latency and timeout budget.
 9. Retryability and idempotency guarantees.
 10. Rate and concurrency limits.
-11. Error semantics and dependency health endpoint.
-12. Contract test environment and support escalation.
+11. Error semantics and health behavior.
+12. Contract test environment and escalation channel.
 
 ## Destination safety
 
-- Destination URLs must come from trusted deployment configuration.
-- Reject destinations supplied through path, query, body, or headers.
-- Prefer a fixed service ID to a client-selected URL.
-- Validate scheme, hostname, port, and allowed network ranges at configuration time.
-- Protect against DNS rebinding where destination resolution is dynamic.
-- Never permit the gateway to reach cloud metadata endpoints or arbitrary private addresses unless explicitly required and isolated.
+- Destinations come from trusted deployment configuration.
+- Never accept target URL/hostname from request path, query, body or headers.
+- Prefer fixed service IDs over arbitrary destinations.
+- Validate scheme, hostname, port and allowed address ranges at configuration time.
+- Restrict redirects and protect against DNS rebinding.
+- Block metadata endpoints and unapproved private networks.
 
 ## Contract lifecycle
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Proposed
-    Proposed --> OwnerReview
-    OwnerReview --> SecurityReview
-    SecurityReview --> ContractTest
-    ContractTest --> Approved
-    ContractTest --> ChangesRequested
-    ChangesRequested --> Proposed
-    Approved --> Active
-    Active --> Deprecated
-    Deprecated --> Retired
-    Retired --> [*]
+  [*] --> Proposed
+  Proposed --> OwnerReview
+  OwnerReview --> SecurityReview
+  SecurityReview --> ContractTesting
+  ContractTesting --> Approved
+  ContractTesting --> ChangesRequested
+  ChangesRequested --> Proposed
+  Approved --> Active
+  Active --> Deprecated
+  Deprecated --> Retired
+  Retired --> [*]
 ```
-
-Keep historical route decisions and deprecation dates in version control or an approved change record.
