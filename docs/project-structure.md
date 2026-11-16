@@ -1,8 +1,8 @@
 # 🗂️ Project structure
 
-## Current state versus target layout
+## Current state
 
-The repository currently has no application source directory. The following is a proposed layout for implementation, not a claim that these files already exist.
+The repository does not yet contain application source files. The following is a proposed layout for the gateway implementation, not a claim that these files already exist.
 
 ```text
 API-Gateway-Tripzy/
@@ -22,12 +22,12 @@ API-Gateway-Tripzy/
 │   ├── service-contracts.md
 │   ├── testing.md
 │   └── threat-model.md
-├── src/                         # proposed, not yet implemented
-│   ├── app.js                   # HTTP app composition
-│   ├── server.js                # process startup and shutdown
+├── src/                       # proposed
+│   ├── app.js
+│   ├── server.js
 │   ├── config/
-│   │   ├── env.js               # validated environment
-│   │   └── services.js          # allowlisted upstream registry
+│   │   ├── env.js
+│   │   └── services.js
 │   ├── middleware/
 │   │   ├── request-id.js
 │   │   ├── authentication.js
@@ -38,8 +38,7 @@ API-Gateway-Tripzy/
 │   ├── routes/
 │   │   ├── health.routes.js
 │   │   └── index.js
-│   ├── clients/
-│   │   └── upstream-client.js
+│   ├── clients/upstream-client.js
 │   ├── policies/
 │   │   ├── headers.js
 │   │   ├── retry.js
@@ -47,40 +46,58 @@ API-Gateway-Tripzy/
 │   └── observability/
 │       ├── logger.js
 │       └── metrics.js
-├── tests/                       # proposed
+├── tests/                     # proposed
 │   ├── unit/
 │   ├── contract/
 │   ├── integration/
 │   └── security/
 ├── .env.example
-├── .gitignore
 ├── package.json
 ├── README.md
 └── SECURITY.md
 ```
 
-## Directory responsibilities
+## Module responsibilities
 
-| Directory | Responsibility |
+| Module | Responsibility | Boundary |
+|---|---|---|
+| `src/app.js` | Compose middleware and routes | No process startup side effects |
+| `src/server.js` | Start listener and graceful shutdown | Reads validated config |
+| `src/config/env.js` | Parse and validate environment | Fails startup on invalid required settings |
+| `src/config/services.js` | Trusted upstream registry | No request-controlled hosts |
+| `src/middleware/request-id.js` | Establish request correlation | Validate or regenerate untrusted ID |
+| `src/middleware/authentication.js` | Verify identity | No unverified JWT claims |
+| `src/middleware/authorization.js` | Enforce route policy | Default deny |
+| `src/middleware/rate-limit.js` | Quota enforcement | Explicit identity keys and failure policy |
+| `src/routes` | Public route definitions | No duplicated domain logic |
+| `src/clients/upstream-client.js` | Outbound service calls | Timeouts, allowlist, response limits |
+| `src/policies` | Header, retry, timeout policies | Centrally tested behavior |
+| `src/observability` | Structured logs and metrics | Redact sensitive values |
+| `tests/unit` | Pure logic tests | No external services |
+| `tests/contract` | Route/upstream contract checks | One contract per registered route |
+| `tests/integration` | Mock-upstream workflows | No production endpoints |
+| `tests/security` | Abuse and bypass regressions | Must run in CI |
+
+## Repository-level files
+
+| File | Responsibility |
 |---|---|
-| `src/config` | Validate environment and trusted service registry |
-| `src/middleware` | Cross-cutting inbound request controls |
-| `src/routes` | Public route definitions only |
-| `src/clients` | Outbound HTTP behavior |
-| `src/policies` | Header, timeout, retry and policy helpers |
-| `src/observability` | Safe structured logs and metrics |
-| `tests/unit` | Pure function and middleware tests |
-| `tests/contract` | Validate upstream request/response contracts |
-| `tests/integration` | Exercise gateway against mock upstreams |
-| `tests/security` | Abuse, bypass, SSRF and header tests |
+| `.env.example` | Safe configuration names and placeholders |
+| `.gitignore` | Excludes local secrets, dependencies and generated artifacts |
+| `.editorconfig` | Editor conventions |
+| `.gitattributes` | Line endings and binary handling |
+| `package.json` | Runtime scripts and dependency metadata |
+| `package-lock.json` | Exact dependency graph when generated |
+| `.github/workflows` | CI, secret scan and dependency audit |
+| `docs/` | API, service, architecture, security and operations guidance |
 
-## File design rules
+## Design rules
 
-- Keep route configuration separate from request handlers.
-- Keep environment parsing in one module.
-- Do not export mutable global configuration objects.
-- Keep network calls behind an upstream client that enforces timeouts.
-- Ensure authorization failures occur before outbound requests.
-- Keep error conversion centralized.
-- Never log credentials or full request/response bodies by default.
-- Avoid adding a database until a requirement justifies durable gateway state.
+- Keep destination config separate from route handler logic.
+- Validate configuration once during startup.
+- Avoid mutable global configuration.
+- Do not expose arbitrary URL forwarding.
+- Authorization must run before any outbound request.
+- Centralize public error mapping.
+- Keep domain persistence within service owners.
+- Add a file only when a real module or workflow requires it.
