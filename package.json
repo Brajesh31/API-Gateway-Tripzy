@@ -4,15 +4,12 @@
   "private": true,
   "description": "API gateway foundation for the Tripzy microservices ecosystem.",
   "type": "module",
-  "main": "src/server.js",
+  "main": "index.js",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "test": "node --test",
-    "check": "node --check src/app.js && node --check src/server.js && node --test"
+    "test": "echo \"No test suite exists yet. Add tests before enabling this command.\" && exit 1"
   },
   "keywords": [
     "tripzy",
