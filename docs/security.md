@@ -1,80 +1,63 @@
 # 🛡️ Security engineering guide
 
-## Security posture
+## Current security posture
 
-No gateway server is currently implemented, so no runtime authentication, authorization, rate limiting, proxy protections, or TLS behavior can be claimed. This document defines the minimum design requirements.
+No gateway server or runtime control is implemented. The following requirements are mandatory design controls, not existing defenses.
 
-## 1. Authentication
+## Authentication
 
-- Verify tokens cryptographically using a trusted issuer and key source.
-- Enforce issuer, audience, expiry, not-before, and allowed algorithms.
-- Reject missing, malformed, expired, or unverifiable credentials.
-- Never use decoded but unverified token claims for authorization.
+- Verify credentials cryptographically using a trusted issuer and keys.
+- Enforce issuer, audience, expiry, not-before and allowed algorithms.
+- Reject unverifiable credentials.
+- Never use decoded but unverified claims.
 - Keep service credentials server-side.
-- Define service-to-service identity separately from client identity.
+- Define client identity separately from gateway-to-service identity.
 
-## 2. Authorization
+## Authorization
 
-- Default to deny.
-- Map every protected route to an explicit permission.
-- Enforce resource-level authorization in the owning service where the gateway lacks authoritative domain context.
-- Do not trust role or user headers supplied by clients.
-- Verify authorization occurs before any upstream call.
-- Test privilege escalation and cross-account access cases.
+- Default-deny.
+- Associate every protected route with an explicit permission.
+- Enforce resource-level access in the service owning the data.
+- Do not trust client-supplied user/role headers.
+- Ensure denials happen before outbound requests.
+- Test privilege escalation and cross-account access.
 
-## 3. SSRF and open-proxy prevention
+## SSRF and open-proxy prevention
 
-- Only route to registered service IDs.
-- Never accept a URL or hostname from a request parameter.
-- Restrict outbound destinations through network policy.
-- Validate URL scheme, hostname, port, resolved IP ranges, and redirects.
-- Block metadata endpoints and unapproved private networks.
-- Do not create a generic URL-forwarding endpoint.
+- Route only to registered service identifiers.
+- Never accept arbitrary URL/hostname from requests.
+- Restrict outbound destinations with network policy.
+- Validate schemes, hosts, ports, DNS resolution and redirect targets.
+- Block metadata endpoints and unapproved private ranges.
+- Never expose a generic fetch/forward URL endpoint.
 
-## 4. Header handling
+## Header handling
 
 - Strip hop-by-hop headers.
-- Filter forwarded headers against an allowlist.
-- Replace, do not trust, gateway identity and correlation headers.
-- Avoid forwarding cookies unless explicitly required.
-- Remove internal service diagnostic headers before returning responses.
-- Prevent request/response header size abuse.
+- Forward only explicit allowlisted headers.
+- Remove untrusted identity headers and recreate only from verified claims.
+- Avoid forwarding cookies unless required and reviewed.
+- Remove internal service diagnostics from public responses.
+- Bound header sizes.
 
-## 5. Request controls
+## Request and resilience controls
 
-- Limit body size, header size, URL length, and request duration.
-- Validate content type and accepted encodings.
-- Rate-limit by meaningful identity dimensions.
-- Apply concurrency limits per upstream.
-- Reject unsupported methods and ambiguous route matching.
-- Set conservative decompression limits if compression is enabled.
+- Limit request/response body, header, URL, concurrency and duration.
+- Validate content type and encodings.
+- Rate-limit by approved identity dimensions.
+- Use per-service deadlines.
+- Retry only safe/idempotent operations within a bounded budget.
+- Bound decompression and streaming behavior.
+- Avoid a single slow service exhausting all gateway resources.
 
-## 6. Resilience controls
+## Logging and errors
 
-- Use per-service timeout budgets.
-- Avoid unbounded retries and retry storms.
-- Retry only safe/idempotent operations under explicit policy.
-- Use circuit breakers only with observable state transitions.
-- Bound response size and streaming behavior.
-- Ensure a downstream outage cannot exhaust all gateway resources.
+Never log tokens, cookies, passwords, private keys, or full private payloads. Return stable public error codes and correlation IDs. Keep detailed diagnostics in restricted logs. Never expose stack traces or internal hosts.
 
-## 7. Logging and error handling
+## Supply chain
 
-- Never log passwords, tokens, cookies, authorization headers, or private payloads.
-- Use stable public error codes.
-- Include a correlation ID in client-safe error responses.
-- Store detailed diagnostics only in restricted logs.
-- Avoid exposing stack traces, upstream hostnames, IP addresses, or internal route names.
+Use lockfiles, review dependency advisories, use minimal GitHub Actions permissions, pin third-party actions to full commit SHAs as a hardening step, and never expose production secrets to untrusted pull-request code.
 
-## 8. Supply chain
+## Production gate
 
-- Commit npm lockfiles when dependencies are introduced.
-- Review dependency advisories before release.
-- Keep GitHub Actions permissions minimal.
-- Pin third-party actions to full commit SHAs for higher supply-chain assurance.
-- Avoid running untrusted pull request code with production secrets.
-- Run secret scanning and dependency auditing.
-
-## Security release gate
-
-A production gateway is not ready until authentication, authorization, upstream allowlisting, request limits, header filtering, timeouts, rate limits, security tests, and operational logging are implemented and reviewed.
+Do not send public traffic until authentication, authorization, upstream allowlisting, SSRF protections, request limits, header filtering, timeouts, rate limiting, security tests and operational logging have been implemented and reviewed.
