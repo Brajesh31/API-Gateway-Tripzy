@@ -1,0 +1,12 @@
+flowchart TD
+  A[Service owner proposes route] --> B[Provide contract and ownership]
+  B --> C[Gateway reviews public path and method]
+  C --> D[Security reviews auth and destination]
+  D --> E[Define schema, limits, timeout and quota]
+  E --> F[Add contract and negative tests]
+  F --> G{All approvals and tests pass?}
+  G -->|No| H[Return for changes]
+  H --> B
+  G -->|Yes| I[Approve route configuration]
+  I --> J[Verify in staging]
+  J --> K[Activate through controlled release]
