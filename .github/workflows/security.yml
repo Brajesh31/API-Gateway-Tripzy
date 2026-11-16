@@ -19,20 +19,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
       - name: Audit dependencies
         run: |
-          npm install --ignore-scripts
+          npm install --ignore-scripts --no-fund
           npm audit --audit-level=high
-        continue-on-error: true
-
   secret-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Scan git history
+      - name: Scan repository history
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
