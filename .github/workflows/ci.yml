@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-checks:
+    name: Node package checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Validate manifest
+        run: node -e "const p=require('./package.json'); if(!p.name || !p.version) process.exit(1); console.log(p.name, p.version)"
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      - name: Syntax-check JavaScript source when present
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d src ]; then
+            find src -type f -name '*.js' -print0 | while IFS= read -r -d '' file; do node --check "$file"; done
+          fi
+          for file in ./*.js; do
+            [ -f "$file" ] && node --check "$file"
+          done
+      - name: Run tests when a real test script exists
+        shell: bash
+        run: |
+          if node -e "const p=require('./package.json'); process.exit(!p.scripts?.test || p.scripts.test.includes('no test specified') ? 0 : 1)"; then
+            echo "No real test suite configured yet; skipping placeholder."
+          else
+            npm test
+          fi
