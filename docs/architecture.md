@@ -1,74 +1,108 @@
-# 🏗️ Architecture and design
+# 🏗️ Architecture and system boundaries
 
-## Status
+> **Status:** Proposed architecture. The current repository has no gateway server, route registry, authentication middleware, or upstream client.
 
-The target architecture is proposed only. No gateway process, route registry, authentication middleware, or upstream client is implemented yet.
+## 1. Architectural intent
 
-## Logical topology
+API Gateway Tripzy is intended to provide a single governed HTTP boundary for client applications and partner integrations. It should centralise transport-level concerns while keeping domain behavior and persistence inside the services that own them.
 
-```mermaid
+The architecture must be based on real Tripzy service contracts. No service names, internal hostnames, routes, or identity provider are confirmed in this repository.
+
+## 2. Logical architecture
+
+~~~mermaid
 flowchart TB
-  Client[External clients] --> Edge[HTTPS edge / WAF]
-  Edge --> GW[Gateway process]
-  GW --> Auth[Identity verification]
-  GW --> Policy[Route authorization and quota]
-  GW --> Registry[Explicit route registry]
-  Registry --> A[Approved service A]
-  Registry --> B[Approved service B]
-  Registry --> C[Approved service C]
-  GW --> Telemetry[Logs, metrics and traces]
-```
+  Client[Web, mobile and partner clients]
+  Edge[HTTPS edge and load balancer]
+  Gateway[Gateway application]
+  Context[Request context]
+  Identity[Identity verification]
+  Policy[Authorization and quota]
+  Registry[Trusted route registry]
+  Client --> Edge --> Gateway
+  Gateway --> Context --> Identity --> Policy --> Registry
+  Registry --> ServiceA[Approved upstream A]
+  Registry --> ServiceB[Approved upstream B]
+  Registry --> ServiceC[Approved upstream C]
+  Gateway --> Telemetry[Logs, metrics and traces]
+  Config[Validated deployment config] --> Gateway
+  Config --> Registry
+~~~
 
-Service labels are placeholders. Replace them with verified Tripzy service ownership and contracts before implementation.
+The service nodes are placeholders. The actual upstream inventory must be supplied by service owners.
 
-## Component responsibilities
+## 3. Component responsibilities
 
-| Component | Responsibility | Design constraint |
+| Component | Responsibility | Security/reliability requirement |
 |---|---|---|
-| Edge proxy | TLS and connection controls | Explicit trusted proxy hops |
-| Gateway listener | Accept HTTP requests | Request and connection limits |
-| Request context | Correlation and timing | Never trust arbitrary identity claims |
-| Authentication | Verify tokens | Fail closed |
-| Authorization | Apply route permissions | Default deny |
-| Rate limiter | Enforce client/user quotas | Define distributed state and outage behavior |
-| Route registry | Resolve fixed upstreams | No host from client input |
-| Upstream client | Forward approved request data | Timeout, header and response limits |
-| Error mapper | Stable public errors | No internal details |
-| Telemetry | Operational events | Redact secrets and private data |
+| Edge | TLS and connection controls | Trusted proxy chain and request framing consistency |
+| Gateway listener | Accept HTTP requests | Connection and body limits |
+| Request context | Correlation and timing | Validate or regenerate client-provided IDs |
+| Identity adapter | Verify caller credentials | Cryptographic validation and fail-closed policy |
+| Authorization policy | Evaluate route permission | Default deny and no client-controlled claims |
+| Route registry | Resolve fixed destination | No arbitrary client-selected URL |
+| Quota policy | Enforce rate/concurrency limits | Explicit identity key and store failure policy |
+| Upstream client | Forward approved request | Deadline, size, header, redirect controls |
+| Error mapper | Stable public response | No internal details |
+| Telemetry | Operational visibility | Redaction and bounded cardinality |
 
-## Request processing
+## 4. Request processing order
 
 1. Edge accepts HTTPS and applies connection policy.
-2. Gateway validates method, path, content type, and request size.
-3. Request ID is generated or validated.
-4. Authentication verifies the credential.
-5. Authorization evaluates route permission.
-6. Explicit registry resolves the fixed upstream.
-7. Headers are filtered and hop-by-hop values removed.
-8. Upstream call uses a service-specific deadline.
-9. Retry is considered only when operation safety and retry budget permit.
-10. Response/error is normalized and safe telemetry emitted.
+2. Gateway validates request framing, method, path, content type, and size.
+3. Gateway creates or validates correlation metadata.
+4. Route resolution finds an exact public method/path mapping.
+5. Authentication verifies the credential when the route requires it.
+6. Authorization evaluates the required permission.
+7. Rate and concurrency policies are applied.
+8. A fixed destination is resolved from trusted configuration.
+9. The outbound request is filtered and sent with a deadline.
+10. The response or failure is normalized and recorded as safe telemetry.
 
-## Failure mapping
+Unknown routes must not reach a generic forwarder. A denied request must not trigger an upstream call.
 
-| Failure | Candidate public status |
-|---|---:|
-| Unknown route | 404 |
-| Invalid/missing token | 401 |
-| Insufficient permission | 403 |
-| Malformed request | 400 |
-| Payload too large | 413 |
-| Quota exceeded | 429 |
-| Upstream unavailable or invalid response | 502/503 |
-| Upstream deadline exceeded | 504 |
-| Internal gateway fault | 500 |
+## 5. Trust boundaries
 
-Exact mappings must be approved in the API contract before release.
+| Boundary | Threat | Control |
+|---|---|---|
+| Client → edge | Malformed request, abuse | TLS, parser consistency, size and connection limits |
+| Edge → gateway | Spoofed forwarded metadata | Explicit trusted proxy configuration |
+| Gateway → identity | Token/key compromise | Trusted issuer, signature and claim validation |
+| Gateway → upstream | SSRF, header spoofing | Fixed service registry and filtered headers |
+| Gateway → telemetry | Sensitive data leakage | Redaction, retention and access controls |
+| CI → deployment | Supply-chain compromise | Least privilege, reviewed workflows and immutable artifact |
 
-## Resilience
+## 6. Failure mapping
 
-Set an overall request deadline and per-upstream budgets. Do not retry non-idempotent operations without a defined idempotency mechanism. Bound attempts and total retry time. Circuit breakers require clear half-open behavior and telemetry. Avoid coupling the health of all services to one dependency.
+| Failure | Candidate response | Isolation expectation |
+|---|---:|---|
+| Unknown public route | 404 | No upstream call |
+| Invalid credential | 401 | Reject protected request |
+| Missing permission | 403 | No upstream call |
+| Quota exceeded | 429 | Reject before forwarding |
+| Upstream invalid response | 502 | Isolate affected service |
+| Upstream unavailable | 503 | Preserve unrelated routes |
+| Upstream timeout | 504 | Cancel/stop work within deadline |
+| Internal gateway error | 500 | Safe public error, restricted diagnostics |
 
-## Deployment topology
+Exact behavior must be approved in the API contract.
 
-Multiple stateless gateway replicas behind a managed edge are a likely target. Shared quotas or idempotency state must be externalised or consistently shared. No deployment topology is currently configured in this repository.
+## 7. Stateless deployment model
+
+Multiple gateway replicas behind an edge/load balancer are a possible target. Statelessness improves horizontal scaling and reduces the risk of gateway persistence becoming a second source of truth. Shared quota/idempotency state, if required, must be designed explicitly.
+
+## 8. Architecture diagrams
+
+Editable sources live in [diagrams](./diagrams/). The architecture guide should remain aligned with the route register, security guide, data-flow guide, and implementation.
+
+## 9. Decisions still open
+
+- HTTP framework and server lifecycle.
+- Identity provider and token contract.
+- Upstream service inventory and network boundaries.
+- Rate-limit store and fail-open/fail-closed policy.
+- Public API versioning.
+- Telemetry backend and retention.
+- Hosting and deployment topology.
+
+Record material choices in [ADRs](./ADRs/README.md).
