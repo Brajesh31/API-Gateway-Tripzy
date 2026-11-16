@@ -1,0 +1,10 @@
+flowchart LR
+  Client[Web / Mobile / Partner] --> Edge[HTTPS Edge / WAF]
+  Edge --> Gateway[Tripzy API Gateway]
+  Gateway --> Identity[Identity Verification]
+  Gateway --> Policy[Authorization and Quotas]
+  Gateway --> Registry[Trusted Route Registry]
+  Registry --> A[Approved Upstream A]
+  Registry --> B[Approved Upstream B]
+  Registry --> C[Approved Upstream C]
+  Gateway --> Telemetry[Redacted Logs / Metrics / Traces]
