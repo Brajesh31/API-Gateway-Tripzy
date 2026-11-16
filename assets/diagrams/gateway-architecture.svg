@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="720" viewBox="0 0 1400 720" role="img" aria-labelledby="t d">
+<title id="t">Proposed API Gateway Tripzy architecture</title>
+<desc id="d">External clients connect through an HTTPS edge to the gateway, which applies request context, identity verification, authorization, quota and trusted routing before calling approved upstream services. Redacted telemetry is emitted separately.</desc>
+<defs>
+ <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#081426"/><stop offset="1" stop-color="#182c53"/></linearGradient>
+ <linearGradient id="g" x2="1" y2="1"><stop stop-color="#22d3ee"/><stop offset="1" stop-color="#818cf8"/></linearGradient>
+ <style>
+ .h{font:700 24px Inter,Arial,sans-serif;fill:#f8fafc}.s{font:500 17px Inter,Arial,sans-serif;fill:#cbd5e1}.tiny{font:600 13px Inter,Arial,sans-serif;fill:#94a3b8;letter-spacing:1px}.node{fill:#132947;stroke:#60a5fa;stroke-width:2}.core{fill:#142f50;stroke:url(#g);stroke-width:3}.line{fill:none;stroke:#67e8f9;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+ </style>
+</defs>
+<rect width="1400" height="720" rx="28" fill="url(#bg)"/>
+<g opacity=".12" stroke="#93c5fd"><path d="M0 80H1400M0 160H1400M0 240H1400M0 320H1400M0 400H1400M0 480H1400M0 560H1400M0 640H1400"/><path d="M100 0V720M200 0V720M300 0V720M400 0V720M500 0V720M600 0V720M700 0V720M800 0V720M900 0V720M1000 0V720M1100 0V720M1200 0V720M1300 0V720"/></g>
+<text x="64" y="66" class="tiny">PROPOSED LOGICAL TOPOLOGY · NOT DEPLOYED</text>
+<rect x="65" y="270" width="205" height="110" rx="18" class="node"/><text x="167" y="316" text-anchor="middle" class="h">Clients</text><text x="167" y="348" text-anchor="middle" class="s">Web · Mobile · Partner</text>
+<rect x="335" y="270" width="205" height="110" rx="18" class="node"/><text x="437" y="316" text-anchor="middle" class="h">HTTPS Edge</text><text x="437" y="348" text-anchor="middle" class="s">WAF · Load Balancer</text>
+<rect x="605" y="230" width="230" height="190" rx="22" class="core"/><text x="720" y="275" text-anchor="middle" class="tiny">TRIPZY</text><text x="720" y="315" text-anchor="middle" class="h">API Gateway</text><text x="720" y="350" text-anchor="middle" class="s">Route + Policy Boundary</text><text x="720" y="380" text-anchor="middle" class="s">Deadlines · Header Rules</text>
+<path d="M270 325H335M540 325H605" class="line"/>
+<rect x="930" y="95" width="205" height="82" rx="16" class="node"/><text x="1032" y="128" text-anchor="middle" class="h">Identity</text><text x="1032" y="153" text-anchor="middle" class="s">Verification</text>
+<rect x="930" y="215" width="205" height="82" rx="16" class="node"/><text x="1032" y="248" text-anchor="middle" class="h">Authorization</text><text x="1032" y="273" text-anchor="middle" class="s">Permissions · Quotas</text>
+<rect x="930" y="335" width="205" height="82" rx="16" class="node"/><text x="1032" y="368" text-anchor="middle" class="h">Route Registry</text><text x="1032" y="393" text-anchor="middle" class="s">Fixed Service IDs</text>
+<path d="M835 275H880V136H930M880 275H930M835 350H880V376H930" class="line"/>
+<rect x="1190" y="150" width="155" height="70" rx="14" class="node"/><text x="1267" y="192" text-anchor="middle" class="s">Upstream A</text>
+<rect x="1190" y="255" width="155" height="70" rx="14" class="node"/><text x="1267" y="297" text-anchor="middle" class="s">Upstream B</text>
+<rect x="1190" y="360" width="155" height="70" rx="14" class="node"/><text x="1267" y="402" text-anchor="middle" class="s">Upstream C</text>
+<path d="M1135 376H1160V185H1190M1160 290H1190M1160 395H1190" class="line"/>
+<rect x="605" y="520" width="530" height="105" rx="18" class="node"/><text x="870" y="562" text-anchor="middle" class="h">Observability</text><text x="870" y="595" text-anchor="middle" class="s">Redacted Logs · Metrics · Distributed Traces</text>
+<path d="M720 420V470H870V520" class="line"/>
+<text x="65" y="670" class="tiny">PLACEHOLDER UPSTREAM NODES · REAL SERVICE CONTRACTS MUST BE CONFIRMED BY OWNERS</text>
+</svg>
