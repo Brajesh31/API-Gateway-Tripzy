@@ -1,0 +1,17 @@
+flowchart TD
+  Start([Inbound HTTPS request]) --> Bounds[Validate method, path, headers and body size]
+  Bounds --> Valid{Request valid?}
+  Valid -->|No| Reject400[400 or 413]
+  Valid -->|Yes| Context[Create trusted request context]
+  Context --> Auth[Verify identity]
+  Auth --> AuthOK{Authenticated?}
+  AuthOK -->|No| Reject401[401]
+  AuthOK -->|Yes| Route[Resolve explicit route]
+  Route --> Exists{Route registered?}
+  Exists -->|No| Reject404[404]
+  Exists -->|Yes| Permission[Authorize permission]
+  Permission --> Allowed{Allowed?}
+  Allowed -->|No| Reject403[403]
+  Allowed -->|Yes| Upstream[Call fixed upstream with deadline]
+  Upstream --> Result[Map safe response or error]
+  Result --> Finish([Return correlation ID])
