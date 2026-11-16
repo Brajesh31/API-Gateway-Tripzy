@@ -19,20 +19,20 @@ jobs:
         with:
           node-version: 20
       - name: Validate package metadata
-        run: node -e "const p=require('./package.json'); if(!p.name || !p.version) process.exit(1)"
+        run: node -e "const p=require('./package.json'); if(!p.name || !p.version || !p.engines?.node) process.exit(1)"
       - name: Install dependencies
         run: npm install --ignore-scripts --no-audit --no-fund
-      - name: Syntax-check source when present
+      - name: Syntax-check JavaScript source when present
         shell: bash
         run: |
           set -euo pipefail
           if [ -d src ]; then
             while IFS= read -r -d '' file; do node --check "$file"; done < <(find src -type f -name '*.js' -print0)
           fi
-      - name: Run actual tests when present
+      - name: Run real tests when test files exist
         shell: bash
         run: |
-          if [ -d tests ] && find tests -type f ( -name '*.test.js' -o -name '*.spec.js' ) | grep -q .; then
+          if [ -d tests ] && find tests -type f \( -name '*.test.js' -o -name '*.spec.js' \) | grep -q .; then
             npm test
           else
             echo "No test files exist yet. The placeholder test command is intentionally not executed."
