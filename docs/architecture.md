@@ -2,98 +2,73 @@
 
 ## Status
 
-The architecture below is a proposed target design. No gateway process, route registry, token verification middleware, or upstream client is committed yet.
+The target architecture is proposed only. No gateway process, route registry, authentication middleware, or upstream client is implemented yet.
 
 ## Logical topology
 
 ```mermaid
 flowchart TB
-    Client[External clients] --> Edge[HTTPS edge / WAF]
-    Edge --> GW[Gateway process]
-    GW --> Auth[Identity verification]
-    GW --> Policy[Route authorization]
-    GW --> Limit[Rate limiting]
-    GW --> Router[Explicit route registry]
-    Router --> S1[Approved service A]
-    Router --> S2[Approved service B]
-    Router --> S3[Approved service C]
-    GW --> Telemetry[Logs / metrics / traces]
+  Client[External clients] --> Edge[HTTPS edge / WAF]
+  Edge --> GW[Gateway process]
+  GW --> Auth[Identity verification]
+  GW --> Policy[Route authorization and quota]
+  GW --> Registry[Explicit route registry]
+  Registry --> A[Approved service A]
+  Registry --> B[Approved service B]
+  Registry --> C[Approved service C]
+  GW --> Telemetry[Logs, metrics and traces]
 ```
 
-The service labels are placeholders. Do not configure them until service owners provide real contracts.
+Service labels are placeholders. Replace them with verified Tripzy service ownership and contracts before implementation.
 
 ## Component responsibilities
 
 | Component | Responsibility | Design constraint |
 |---|---|---|
-| Edge proxy | TLS, connection protection, optional WAF | Configure trusted proxy hops explicitly |
-| Gateway listener | Accept HTTP requests | Set size/time limits |
-| Request context | Request ID, timing, safe metadata | Do not trust arbitrary identity headers |
-| Authentication | Verify credentials/tokens | Fail closed on unverifiable identity |
-| Authorization | Evaluate route permissions | Deny by default |
-| Rate limiter | Enforce client/user/service quotas | Distributed state may be required |
-| Route registry | Map path/method to fixed upstream | Never derive upstream host from request parameters |
-| Upstream client | Forward allowed request data | Timeouts and header allowlist |
-| Error mapper | Produce stable public errors | Never expose stack traces or internal addresses |
-| Telemetry | Record safe operational events | Redact tokens and personal data |
+| Edge proxy | TLS and connection controls | Explicit trusted proxy hops |
+| Gateway listener | Accept HTTP requests | Request and connection limits |
+| Request context | Correlation and timing | Never trust arbitrary identity claims |
+| Authentication | Verify tokens | Fail closed |
+| Authorization | Apply route permissions | Default deny |
+| Rate limiter | Enforce client/user quotas | Define distributed state and outage behavior |
+| Route registry | Resolve fixed upstreams | No host from client input |
+| Upstream client | Forward approved request data | Timeout, header and response limits |
+| Error mapper | Stable public errors | No internal details |
+| Telemetry | Operational events | Redact secrets and private data |
 
-## Request lifecycle
+## Request processing
 
-1. Edge accepts HTTPS traffic and applies connection controls.
+1. Edge accepts HTTPS and applies connection policy.
 2. Gateway validates method, path, content type, and request size.
-3. A correlation ID is generated or validated using a strict policy.
-4. Authentication verifies the presented identity.
-5. Route-level authorization evaluates claims and resource policy.
-6. The explicit route registry resolves a fixed upstream destination.
-7. Request headers are filtered and hop-by-hop headers are removed.
-8. The gateway forwards the request using a service-specific timeout.
-9. Retry is considered only when the operation is safe and the retry budget permits it.
-10. The public response is normalised and internal details are removed.
-11. Telemetry records status and duration without sensitive values.
+3. Request ID is generated or validated.
+4. Authentication verifies the credential.
+5. Authorization evaluates route permission.
+6. Explicit registry resolves the fixed upstream.
+7. Headers are filtered and hop-by-hop values removed.
+8. Upstream call uses a service-specific deadline.
+9. Retry is considered only when operation safety and retry budget permit.
+10. Response/error is normalized and safe telemetry emitted.
 
-## Upstream registry model
+## Failure mapping
 
-A route registration should eventually include:
-- Stable route identifier.
-- Public path and allowed methods.
-- API version.
-- Destination identifier referencing trusted configuration.
-- Authentication mode.
-- Required permissions.
-- Request/response validation strategy.
-- Timeout budget.
-- Retry policy and idempotency requirements.
-- Rate limit group.
-- Owning service/team.
-- Contract test location.
+| Failure | Candidate public status |
+|---|---:|
+| Unknown route | 404 |
+| Invalid/missing token | 401 |
+| Insufficient permission | 403 |
+| Malformed request | 400 |
+| Payload too large | 413 |
+| Quota exceeded | 429 |
+| Upstream unavailable or invalid response | 502/503 |
+| Upstream deadline exceeded | 504 |
+| Internal gateway fault | 500 |
 
-Avoid scattering destination URLs through handlers.
+Exact mappings must be approved in the API contract before release.
 
-## Failure model
+## Resilience
 
-| Failure | Public behavior | Internal behavior |
-|---|---|---|
-| Unknown route | 404 | Safe route-not-found event |
-| Invalid/missing token | 401 | Authentication rejection metric |
-| Insufficient permission | 403 | Authorization rejection metric |
-| Invalid payload | 400 or 422 | Field-level safe diagnostics |
-| Rate limit exceeded | 429 and retry guidance | Quota metric |
-| Upstream timeout | 504 | Timeout metric with service ID |
-| Upstream unavailable | 502 or 503 per contract | Circuit/dependency telemetry |
-| Gateway internal fault | 500 with correlation ID | Redacted stack trace in restricted logs |
-
-Choose the exact mapping consistently before implementation and document it in [API conventions](./api.md).
-
-## Resilience decisions
-
-- Set a deadline for the full inbound request.
-- Reserve time for response serialization.
-- Do not retry non-idempotent operations without an explicit idempotency mechanism.
-- Bound retry count and total retry duration.
-- Use circuit breaking only with clear half-open behavior and observability.
-- Ensure one slow service cannot exhaust all gateway connections.
-- Define whether partial aggregation is supported before implementing fan-out requests.
+Set an overall request deadline and per-upstream budgets. Do not retry non-idempotent operations without a defined idempotency mechanism. Bound attempts and total retry time. Circuit breakers require clear half-open behavior and telemetry. Avoid coupling the health of all services to one dependency.
 
 ## Deployment topology
 
-A typical target may contain multiple stateless gateway replicas behind a managed load balancer. Any distributed rate-limit/session state must be externalised or consistently shared. The current repository does not provide container or cloud deployment configuration.
+Multiple stateless gateway replicas behind a managed edge are a likely target. Shared quotas or idempotency state must be externalised or consistently shared. No deployment topology is currently configured in this repository.
