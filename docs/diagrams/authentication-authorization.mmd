@@ -1,0 +1,11 @@
+flowchart TD
+  A[Request with credential] --> B[Extract token]
+  B --> C[Verify signature and algorithm]
+  C --> D[Validate issuer, audience and time]
+  D --> E{Identity verified?}
+  E -->|No| X401[401 Unauthorized]
+  E -->|Yes| F[Build minimal trusted principal]
+  F --> G[Load route permission policy]
+  G --> H{Permission granted?}
+  H -->|No| X403[403 Forbidden]
+  H -->|Yes| I[Continue to quota and routing]
