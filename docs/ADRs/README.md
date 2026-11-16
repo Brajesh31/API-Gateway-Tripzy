@@ -1,6 +1,6 @@
 # 🧾 Architecture Decision Records
 
-Architecture Decision Records capture important technical choices, the context that led to them, alternatives considered, and the consequences of the decision.
+Architecture Decision Records (ADRs) capture important technical choices, the context that led to them, alternatives considered, and the consequences of the decision.
 
 ## Why use ADRs?
 
@@ -25,9 +25,17 @@ Gateway decisions have long-lived effects. Choosing an identity provider, route 
 | 0005 | Rate-limit state and failure policy | Not written |
 | 0006 | Observability and telemetry pipeline | Not written |
 
-## Writing a decision
+## Creating an ADR
 
-Copy the structure from ADR 0001. Keep one decision per file, use sequential identifiers, and do not silently rewrite accepted historical decisions. Create a new ADR when a decision changes.
+1. Copy [the ADR template](./template.md).
+2. Assign the next sequential four-digit identifier.
+3. Describe verified context separately from assumptions.
+4. Compare meaningful alternatives and trade-offs.
+5. Include security, privacy, operational, and migration consequences.
+6. Obtain required service-owner and security review.
+7. Link implementation and tests after they exist.
+
+Keep one decision per file. Do not silently rewrite accepted historical decisions. Create a new ADR when a decision changes.
 
 ## Review expectations
 
