@@ -1,9 +1,30 @@
+# Dependencies and generated output
 node_modules/
+coverage/
+dist/
+build/
+
+# Local configuration and secrets
 .env
 .env.*
 !.env.example
+
+# Logs and operating-system artifacts
 *.log
-coverage/
-dist/
+npm-debug.log*
 .DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# IDE workspace state
 .idea/workspace.xml
+.idea/tasks.xml
+.idea/shelf/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Test reports
+.nyc_output/
+junit.xml
