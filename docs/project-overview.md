@@ -1,53 +1,68 @@
-# 🎯 Project overview
+# 🎯 Project overview and product boundaries
 
-## What this repository is
+## 1. What this repository is
 
-API Gateway Tripzy is a Node.js project intended to become a controlled client-facing entry point for a Tripzy microservices ecosystem. The current repository is a package and documentation scaffold, not an operational gateway.
+API Gateway Tripzy is intended to become a controlled HTTP entry point for a Tripzy microservices ecosystem. The current repository contains package metadata and engineering documentation. It does not contain a running gateway.
 
-## Problem to address
+The goal is to define a secure and maintainable boundary between external clients and backend services, not to create another application that owns every domain operation.
 
-As clients interact with multiple services, they can become coupled to different hostnames, authentication conventions, error formats, and reliability behavior. A gateway can centralise cross-cutting controls while leaving domain logic with the service that owns it.
+## 2. Problem statement
 
-## Goals
+When client applications integrate with multiple backend services, they can become coupled to internal hostnames, authentication conventions, error formats, API versions, and failure behavior. Repeating those concerns in every client increases inconsistency and maintenance cost.
 
-1. Define a secure and explicit public API boundary.
-2. Maintain a reviewed route and upstream registry.
-3. Centralise identity verification, route authorization, rate limits, and request constraints.
-4. Make upstream failure behavior predictable and observable.
-5. Preserve service ownership of business rules and persistence.
-6. Provide repeatable contract, integration, security, and resilience tests.
+A gateway can provide a stable public API boundary and centralise selected transport-level policies. Poorly designed gateways can also create a single point of failure, an open proxy, duplicated business logic, or an overly privileged network component. The design must address both sides.
 
-## Non-goals
+## 3. Proposed solution
 
-Unless a product decision explicitly changes scope, the gateway should not:
-- Reimplement booking, trip, user, payment, or search domain rules.
-- Connect directly to each microservice database.
-- Accept arbitrary client-provided upstream URLs.
-- Expose internal service discovery details.
-- Become a generic open proxy.
-- Turn downstream partial failure into misleading success.
+A route registry maps public methods and paths to approved service identifiers and internal paths. Middleware verifies identity and permissions, applies request limits and quotas, filters headers, and establishes correlation metadata. An outbound client applies deadlines and safe response handling. Telemetry records operational signals without exposing private payloads.
 
-## Current repository evidence
+## 4. Goals
 
-- A root package manifest exists.
-- The manifest points at a future `index.js`, but that file is absent.
-- No HTTP framework or proxy/auth dependencies are installed.
-- No route handlers or upstream destinations are configured.
-- The current test script is a placeholder that exits with an error.
-- The environment example contains suggested names only.
-- Existing project docs do not prove that runtime features exist.
+1. Provide stable and versioned public routes.
+2. Centralise authentication integration and route-level authorization.
+3. Restrict outbound traffic to approved service destinations.
+4. Bound request sizes, concurrency, and dependency time.
+5. Normalize errors into a stable public contract.
+6. Make requests diagnosable through redacted logs and traces.
+7. Keep domain rules and persistence with service owners.
+8. Provide repeatable contract, integration, and security tests.
 
-## Actors
+## 5. Non-goals
 
-| Actor | Expected interaction |
-|---|---|
-| Web/mobile client | Uses stable public API routes |
-| Partner integration | Uses explicitly exposed and authorized endpoints |
-| Identity provider | Issues/verifies identity credentials |
-| Upstream service | Owns domain operations and records |
-| Platform operator | Configures, deploys, monitors and recovers gateway |
-| Security reviewer | Reviews auth, route boundaries and abuse controls |
+- Reimplementing Tripzy domain logic.
+- Becoming a database gateway for every service.
+- Accepting arbitrary target URLs.
+- Replacing service-level authorization.
+- Storing customer data without an explicit design decision.
+- Claiming production performance or security certification without evidence.
 
-## Success measures to define
+## 6. Actors and responsibilities
 
-Candidate measures include request success ratio, p95/p99 latency, upstream timeouts, auth/authorization rejection rates, rate-limit correctness, trace propagation coverage, and API compatibility. Numeric targets must be agreed with product and service owners, not invented in this repository.
+| Actor | Interaction | Responsibility |
+|---|---|---|
+| Web/mobile client | Uses public API | Sends requests under documented contract |
+| Partner client | Uses approved integration routes | Protects issued credentials |
+| Gateway maintainer | Owns route policy and public compatibility | Reviews code and route definitions |
+| Upstream service owner | Supplies service contract | Owns domain behavior and availability |
+| Identity provider owner | Issues identity credentials | Defines claims and key lifecycle |
+| Platform operator | Runs gateway infrastructure | Owns capacity, monitoring and recovery |
+| Security reviewer | Reviews trust boundaries | Challenges abuse and access assumptions |
+
+## 7. Current repository evidence
+
+- package.json exists and declares Node.js >=20 and ES module mode.
+- No server entry point or application source exists.
+- No HTTP framework or proxy dependency is installed.
+- No routes or upstream service registry exist.
+- No authentication or authorization implementation exists.
+- No test files exist; npm test is a placeholder failure.
+- .env.example is illustrative and is not loaded by an application.
+- Documentation includes proposed architecture and Mermaid design diagrams.
+
+## 8. Success measures to define
+
+Candidate indicators include successful request ratio, p95/p99 latency, upstream timeout ratio, authentication dependency availability, quota correctness, contract compatibility, and trace propagation coverage. Numeric targets must be agreed with product, service, and platform owners.
+
+## 9. Product readiness definition
+
+The project is not ready for production until the runtime is implemented, every route has a verified contract and owner, security controls are tested, operational signals and alerts exist, deployment is reproducible, and rollback is proven.
