@@ -1,41 +1,92 @@
-# 🧪 Testing strategy
+# 🧪 Testing strategy and verification plan
 
-## Current state
-No test framework or test files are present. The package test command is a placeholder that exits with status 1. Replace it with an actual suite before using tests as a release gate.
+## 1. Current status
 
-## Required layers
-| Layer | Coverage | Suggested method |
+No application test framework or test files are present. The current npm test script is an intentional placeholder that exits with status 1. Replace it with a real suite before treating tests as a release gate.
+
+## 2. Test pyramid
+
+~~~mermaid
+flowchart TD
+  E2E[Small number of end-to-end smoke tests]
+  Contract[Service contract and integration tests]
+  Middleware[Middleware and policy tests]
+  Unit[Large base of unit tests]
+  Unit --> Middleware --> Contract --> E2E
+~~~
+
+Most policy logic should be verified with fast deterministic unit tests. Network and end-to-end tests should use local mocks and controlled environments.
+
+## 3. Required test layers
+
+| Layer | Coverage | Example method |
 |---|---|---|
 | Unit | Route matching, config parsing, header filtering, error mapping | Node test runner or selected framework |
-| Middleware | Authentication, authorization, request IDs, limits | Mock requests and responses |
-| Contract | Every upstream request/response | OpenAPI/schema-based validation |
-| Integration | Gateway against mock upstreams | Local test HTTP servers |
-| Security | SSRF, header spoofing, privilege bypass | Adversarial regression cases |
+| Middleware | Authentication, authorization, request IDs, limits | Mock request/response adapters |
+| Contract | Every upstream request/response | OpenAPI/schema validation |
+| Integration | Gateway against upstream stubs | Local HTTP test servers |
+| Security | SSRF, header spoofing, privilege bypass | Adversarial regression tests |
 | Resilience | Timeout, disconnect, retry and circuit behavior | Fault-injecting mock upstream |
-| Load | Throughput, percentiles, concurrency and quotas | Controlled isolated load test |
-| Smoke | Deployment readiness | Safe, non-destructive probes |
+| Load | Throughput, percentiles, concurrency and quotas | Isolated controlled load test |
+| Smoke | Deployed readiness | Safe, non-destructive probes |
 
-## Mandatory security regression tests
-- Missing, malformed, expired, wrong-issuer, wrong-audience and invalid-signature tokens.
-- Valid identity with insufficient permission.
-- Authorization denial occurs before any upstream request.
-- Spoofed identity headers are removed.
+## 4. Unit test catalogue
+
+- Exact route matching, method mismatch, path parameters, and ambiguous definitions.
+- Required and optional configuration values.
+- Invalid URL, port, timeout, and size configuration.
+- Header allowlist and hop-by-hop removal.
+- Correlation ID validation and regeneration.
+- Retry decision by method and idempotency contract.
+- Public error mapping for known internal failures.
+- Metric label cardinality policy.
+
+## 5. Authentication and authorization tests
+
+- Missing, malformed, expired, not-yet-valid, wrong-issuer, wrong-audience, wrong-algorithm, and invalid-signature tokens.
+- Unknown signing key and key rotation behavior.
+- Valid identity without required permission.
+- Cross-user and cross-tenant resource request.
+- Spoofed user, role, and tenant headers.
+- Denial occurs before any outbound request.
+- Identity provider/key source unavailable.
+
+## 6. Contract tests
+
+For every registered route validate method/path, authentication, permissions, destination service ID, upstream path, request schema, response schema, status mapping, header behavior, timeout, retry, idempotency, and quota semantics.
+
+## 7. Integration tests
+
+Use local mock upstream servers, never production endpoints. Cover normal response, slow response, connection reset, malformed body, oversized response, redirect, upstream 4xx/5xx, unavailable DNS, and client disconnect.
+
+## 8. Mandatory security regression tests
+
 - Unknown route and unregistered destination fail closed.
-- Redirects cannot escape the upstream allowlist.
-- Oversized request and response are rejected safely.
-- Rate-limit quota returns a documented 429.
-- Unsafe mutations are not automatically retried.
-- Upstream timeout maps to the documented public error.
-- Public response contains no stack trace, internal host, or credential.
+- Arbitrary scheme, hostname, port, and redirect cannot escape the allowlist.
+- Metadata endpoints and unapproved private IPs are blocked.
+- Oversized request/response is safely rejected.
+- Quota exhaustion returns documented 429.
+- Unsafe mutations are not retried automatically.
+- Public errors contain no stack trace, internal host, or credential.
+- Logs and traces contain no token or sensitive payload.
 
-## Contract tests
-For each registered service route validate method/path, auth requirement, permission, destination service ID, outbound path, request schema, response schema, status mapping, timeout, retry and idempotency behavior.
+## 9. Test data and environment
 
-## Integration tests
-Use local mock upstream servers, not production services. Test normal response, slow response, connection reset, malformed body, oversized response, unexpected redirect, upstream 4xx/5xx, and unavailable DNS/network behavior.
+Use deterministic synthetic identities and payloads. Keep signing keys and fixtures test-only. Do not commit real bearer tokens, customer records, production URLs, or private payloads. Use isolated service containers or local mock servers.
 
-## Quality gates
-All required tests pass. Lint and syntax checks pass. High/critical dependency advisories are remediated or have an explicit security-approved exception. Contract changes have service-owner approval. Security changes update the threat model.
+## 10. CI quality gates
 
-## Test data
-Use deterministic synthetic identities and payloads. Never commit real bearer tokens, customer data, or production URLs.
+- Package metadata parses.
+- Source syntax checks pass when source exists.
+- Markdown and internal links validate.
+- Actual tests run when test files exist.
+- Dependency advisories are reviewed.
+- Secret scanning passes.
+- Mermaid and image references are checked.
+- Workflow permissions remain minimal.
+
+A skipped test stage must be reported as skipped, not passed.
+
+## 11. Release gate
+
+All required tests pass; security-critical findings are remediated or explicitly accepted by an authorised owner; contract changes have service-owner approval; and documentation is updated with implementation evidence.
