@@ -1,0 +1,14 @@
+flowchart TB
+  Config[Validated configuration] --> App[Application composition]
+  Server[Server lifecycle] --> App
+  App --> Context[Request context]
+  App --> Resolver[Route resolver]
+  Resolver --> Auth[Authentication adapter]
+  Auth --> Policy[Authorization policy]
+  Policy --> Quota[Quota and concurrency]
+  Quota --> Client[Upstream client]
+  Client --> Mapper[Error mapper]
+  App --> Logger[Structured logger]
+  App --> Metrics[Metrics and tracing]
+  Registry[Trusted route definitions] --> Resolver
+  Registry --> Client
