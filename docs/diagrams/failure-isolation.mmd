@@ -1,0 +1,15 @@
+flowchart TD
+  A[Gateway receives request] --> B[Resolve service-specific budget]
+  B --> C[Acquire bounded concurrency slot]
+  C --> D{Slot available?}
+  D -->|No| E[Reject or bounded queue]
+  D -->|Yes| F[Call approved upstream with deadline]
+  F --> G{Upstream responds?}
+  G -->|Yes| H[Normalize response]
+  G -->|No| I[Classify timeout or failure]
+  I --> J{Retry is safe and budget remains?}
+  J -->|Yes| K[Backoff with jitter]
+  K --> F
+  J -->|No| L[Map safe public error]
+  H --> M[Release resources]
+  L --> M
