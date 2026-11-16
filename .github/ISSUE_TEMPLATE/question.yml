@@ -1,0 +1,35 @@
+name: "❓ Usage question"
+description: Ask a non-security question about repository setup or future gateway design.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This repository does not currently contain a running gateway. Do not include tokens, credentials, private URLs, customer data, or production payloads.
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      options:
+        - Repository setup
+        - Architecture
+        - API contracts
+        - Authentication and authorization
+        - Security
+        - Documentation
+        - CI and automation
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What are you trying to understand?
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What have you already checked?
+    validations:
+      required: true
