@@ -90,6 +90,13 @@ This directory is the technical reference for API Gateway Tripzy. It separates v
 - [References and standards](./references.md)
 - [FAQ](./faq.md)
 
+## 🖼️ Visual assets
+
+- [Asset inventory](../assets/README.md) describes the original SVG banner and architecture/request-flow illustrations.
+- [Architecture SVG](../assets/diagrams/gateway-architecture.svg) is a visual companion to the editable Mermaid architecture source.
+- [Request-flow SVG](../assets/illustrations/request-security-flow.svg) illustrates the proposed validation and policy pipeline.
+- No application screenshots are included because the runtime and UI are not implemented.
+
 ## 📊 Diagram sources
 
 Editable Mermaid sources are stored in [diagrams/](./diagrams/). They cover target architecture, request lifecycle, overall workflow, data flow, error handling, contract lifecycle, and deployment pipeline. Keep them aligned with implementation and verified service contracts.
