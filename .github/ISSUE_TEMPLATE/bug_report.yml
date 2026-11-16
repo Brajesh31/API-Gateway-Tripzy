@@ -1,0 +1,47 @@
+name: "🐛 Bug report"
+description: Report a reproducible defect in gateway code or repository automation.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include tokens, credentials, private URLs, customer data, or payloads. Report security vulnerabilities privately using SECURITY.md.
+  - type: input
+    id: commit
+    attributes:
+      label: Commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Gateway runtime
+        - Routing
+        - Authentication
+        - Authorization
+        - Configuration
+        - Observability
+        - CI or documentation
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior (redact sensitive data)
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Sanitized reproduction steps and status codes
+    validations:
+      required: true
