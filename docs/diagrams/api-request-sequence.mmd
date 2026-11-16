@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  actor Client
+  participant Gateway
+  participant Identity
+  participant Policy
+  participant Service
+  Client->>Gateway: Request to public route
+  Gateway->>Gateway: Validate framing and limits
+  Gateway->>Gateway: Resolve registered route
+  Gateway->>Identity: Verify credential when required
+  Identity-->>Gateway: Verified principal or rejection
+  Gateway->>Policy: Evaluate permission and quota
+  Policy-->>Gateway: Allow or deny
+  alt Allowed
+    Gateway->>Service: Forward filtered request with deadline
+    Service-->>Gateway: Response
+    Gateway->>Gateway: Normalize response and headers
+    Gateway-->>Client: Public response and correlation ID
+  else Denied
+    Gateway-->>Client: Safe 401, 403 or 429 error
+  end
