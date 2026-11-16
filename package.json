@@ -14,9 +14,18 @@
   "keywords": [
     "tripzy",
     "api-gateway",
+    "api",
+    "gateway",
     "microservices",
     "nodejs",
-    "http"
+    "javascript",
+    "http",
+    "routing",
+    "reverse-proxy",
+    "api-management",
+    "security",
+    "observability",
+    "distributed-systems"
   ],
   "author": "Brajesh Kumar",
   "license": "MIT"
