@@ -1,103 +1,160 @@
-# 🗂️ Project structure
+# 🗂️ Project structure and file responsibilities
 
-## Current state
+## 1. Current repository structure
 
-The repository does not yet contain application source files. The following is a proposed layout for the gateway implementation, not a claim that these files already exist.
+The tree below reflects the documentation and configuration files present in the repository. It intentionally does not invent application source folders that do not exist.
 
-```text
+~~~text
 API-Gateway-Tripzy/
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml
+│   │   ├── config.yml
+│   │   ├── documentation.yml
+│   │   └── feature_request.yml
 │   ├── workflows/
+│   │   ├── ci.yml
+│   │   ├── security.yml
+│   │   └── update-readme.yml
+│   ├── dependabot.yml
 │   └── PULL_REQUEST_TEMPLATE.md
+├── assets/
+│   └── banners/
+│       └── api-gateway-tripzy.svg
 ├── docs/
+│   ├── ADRs/
 │   ├── diagrams/
+│   ├── README.md
+│   ├── accessibility.md
 │   ├── api.md
 │   ├── architecture.md
 │   ├── configuration.md
-│   ├── development.md
+│   ├── data-flow.md
+│   ├── database.md
 │   ├── deployment.md
+│   ├── development.md
+│   ├── features.md
+│   ├── future-scope.md
+│   ├── glossary.md
+│   ├── incident-response.md
+│   ├── installation.md
+│   ├── internationalization.md
+│   ├── limitations.md
+│   ├── modules.md
+│   ├── observability.md
 │   ├── operations.md
+│   ├── performance.md
+│   ├── privacy-data-handling.md
+│   ├── project-overview.md
+│   ├── project-structure.md
+│   ├── references.md
+│   ├── release-management.md
 │   ├── security.md
 │   ├── service-contracts.md
+│   ├── system-design.md
+│   ├── technical-debt.md
 │   ├── testing.md
-│   └── threat-model.md
-├── src/                       # proposed
-│   ├── app.js
-│   ├── server.js
-│   ├── config/
-│   │   ├── env.js
-│   │   └── services.js
-│   ├── middleware/
-│   │   ├── request-id.js
-│   │   ├── authentication.js
-│   │   ├── authorization.js
-│   │   ├── rate-limit.js
-│   │   ├── request-size.js
-│   │   └── error-handler.js
-│   ├── routes/
-│   │   ├── health.routes.js
-│   │   └── index.js
-│   ├── clients/upstream-client.js
-│   ├── policies/
-│   │   ├── headers.js
-│   │   ├── retry.js
-│   │   └── timeout.js
-│   └── observability/
-│       ├── logger.js
-│       └── metrics.js
-├── tests/                     # proposed
-│   ├── unit/
-│   ├── contract/
-│   ├── integration/
-│   └── security/
+│   ├── threat-model.md
+│   ├── troubleshooting.md
+│   ├── usage.md
+│   ├── versioning-and-compatibility.md
+│   └── workflow.md
+├── .editorconfig
 ├── .env.example
+├── .gitattributes
+├── .gitignore
+├── CHANGELOG.md
+├── CITATION.cff
+├── CODEOWNERS
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
 ├── package.json
 ├── README.md
-└── SECURITY.md
-```
+├── ROADMAP.md
+├── SECURITY.md
+└── SUPPORT.md
+~~~
 
-## Module responsibilities
+## 2. Root-level file responsibilities
 
-| Module | Responsibility | Boundary |
+| File | Responsibility | Current role |
 |---|---|---|
-| `src/app.js` | Compose middleware and routes | No process startup side effects |
-| `src/server.js` | Start listener and graceful shutdown | Reads validated config |
-| `src/config/env.js` | Parse and validate environment | Fails startup on invalid required settings |
-| `src/config/services.js` | Trusted upstream registry | No request-controlled hosts |
-| `src/middleware/request-id.js` | Establish request correlation | Validate or regenerate untrusted ID |
-| `src/middleware/authentication.js` | Verify identity | No unverified JWT claims |
-| `src/middleware/authorization.js` | Enforce route policy | Default deny |
-| `src/middleware/rate-limit.js` | Quota enforcement | Explicit identity keys and failure policy |
-| `src/routes` | Public route definitions | No duplicated domain logic |
-| `src/clients/upstream-client.js` | Outbound service calls | Timeouts, allowlist, response limits |
-| `src/policies` | Header, retry, timeout policies | Centrally tested behavior |
-| `src/observability` | Structured logs and metrics | Redact sensitive values |
-| `tests/unit` | Pure logic tests | No external services |
-| `tests/contract` | Route/upstream contract checks | One contract per registered route |
-| `tests/integration` | Mock-upstream workflows | No production endpoints |
-| `tests/security` | Abuse and bypass regressions | Must run in CI |
+| README.md | Project presentation and navigation | Main entry point |
+| package.json | Node package metadata and scripts | Declares runtime baseline |
+| .env.example | Safe configuration names | Planning template only |
+| .gitignore | Excludes local/generated files | Repository hygiene |
+| .editorconfig | Editor consistency | Formatting defaults |
+| .gitattributes | Git line-ending and file handling | Text normalization |
+| LICENSE | Legal reuse terms | MIT license |
+| CONTRIBUTING.md | Contribution workflow | Contributor guidance |
+| CODE_OF_CONDUCT.md | Community behavior | Community policy |
+| SECURITY.md | Vulnerability reporting | Security contact guidance |
+| SUPPORT.md | Support request guidance | Project support |
+| CHANGELOG.md | Release history | Unreleased foundation notes |
+| ROADMAP.md | Proposed milestones | Planning |
+| CITATION.cff | Citation metadata | Software citation |
+| CODEOWNERS | Default review ownership | Repository owner mapping |
 
-## Repository-level files
+## 3. GitHub automation directories
 
-| File | Responsibility |
-|---|---|
-| `.env.example` | Safe configuration names and placeholders |
-| `.gitignore` | Excludes local secrets, dependencies and generated artifacts |
-| `.editorconfig` | Editor conventions |
-| `.gitattributes` | Line endings and binary handling |
-| `package.json` | Runtime scripts and dependency metadata |
-| `package-lock.json` | Exact dependency graph when generated |
-| `.github/workflows` | CI, secret scan and dependency audit |
-| `docs/` | API, service, architecture, security and operations guidance |
+The issue templates standardise bug, feature, and documentation reports. The config template directs sensitive reports to private advisories. Dependabot checks npm and GitHub Actions dependency updates. CI and security workflows provide repository-level checks.
 
-## Design rules
+Workflow definitions are not proof that application runtime behavior is implemented. See [workflow](./workflow.md) and [release management](./release-management.md).
 
-- Keep destination config separate from route handler logic.
-- Validate configuration once during startup.
-- Avoid mutable global configuration.
-- Do not expose arbitrary URL forwarding.
-- Authorization must run before any outbound request.
-- Centralize public error mapping.
-- Keep domain persistence within service owners.
-- Add a file only when a real module or workflow requires it.
+## 4. Documentation directories
+
+- **ADRs:** records significant architectural decisions and their status.
+- **diagrams:** editable Mermaid sources for request, data, architecture, error, and release flows.
+- **Engineering guides:** describe API contracts, configuration, security, testing, operations, and deployment.
+- **Governance guides:** describe data ownership, release policy, limitations, and technical debt.
+
+## 5. Proposed future runtime structure
+
+The following layout is a design proposal, not current files:
+
+~~~text
+src/
+├── app.js
+├── server.js
+├── config/
+│   ├── env.js
+│   └── routes.js
+├── middleware/
+│   ├── request-context.js
+│   ├── authentication.js
+│   ├── authorization.js
+│   ├── rate-limit.js
+│   └── error-handler.js
+├── clients/
+│   └── upstream-client.js
+├── policies/
+│   ├── headers.js
+│   ├── retry.js
+│   └── timeout.js
+├── errors/
+│   └── mapper.js
+└── observability/
+    ├── logger.js
+    ├── metrics.js
+    └── tracing.js
+
+tests/
+├── unit/
+├── contract/
+├── integration/
+└── security/
+~~~
+
+## 6. Naming conventions
+
+- Use lowercase kebab-case for multiword documentation and configuration files.
+- Use explicit .js extensions for Node.js ES module imports.
+- Keep route IDs stable and independent of internal hostnames.
+- Keep service IDs stable across environment-specific destination URLs.
+- Keep test names descriptive and tied to behavior.
+- Keep diagrams as editable source files and reference them from the documentation.
+
+## 7. Structure governance
+
+Do not add empty directories or placeholder source modules merely to make the tree look complete. Add files when there is real implementation, a substantive guide, or a maintainable workflow. Update this document when the actual repository tree changes.
