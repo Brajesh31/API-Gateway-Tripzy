@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate Markdown structure and local references
+      - name: Validate Markdown files, local links, images and code fences
         shell: bash
         run: |
           python - <<'PY'
@@ -22,28 +22,33 @@ jobs:
           import re
           import sys
 
-          root = Path(".")
           errors = []
-          markdown = list(root.rglob("*.md"))
+          markdown = list(Path(".").rglob("*.md"))
           for path in markdown:
               content = path.read_text(encoding="utf-8")
               if not content.strip():
                   errors.append(f"{path}: empty Markdown file")
-              for target in re.findall(r"!\[[^\]]*\]\(([^)]+)\)", content):
+
+              targets = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", content)
+              targets += re.findall(r'<(?:img|source)\b[^>]*\bsrc=["\']([^"\']+)', content, flags=re.I)
+              for target in targets:
                   if target.startswith(("http://", "https://", "data:")):
                       continue
-                  target = target.split("#", 1)[0]
-                  if target and not (path.parent / target).resolve().exists():
+                  clean = target.split("#", 1)[0]
+                  if clean and not (path.parent / clean).resolve().exists():
                       errors.append(f"{path}: missing image {target}")
+
               for target in re.findall(r"(?<!!)\[[^\]]+\]\(([^)]+)\)", content):
                   if target.startswith(("http://", "https://", "mailto:", "#")):
                       continue
                   clean = target.split("#", 1)[0]
                   if clean and not (path.parent / clean).resolve().exists():
                       errors.append(f"{path}: missing local link {target}")
-              fences = re.findall(r"^([~]{3,}|[" + chr(96) + r"]{3,})", content, flags=re.M)
-              if len(fences) % 2:
+
+              fence_pattern = re.compile(r"^(" + re.escape(chr(96) * 3) + r"+|~{3,})", re.M)
+              if len(fence_pattern.findall(content)) % 2:
                   errors.append(f"{path}: unclosed fenced code block")
+
           if errors:
               print("\n".join(errors))
               sys.exit(1)
