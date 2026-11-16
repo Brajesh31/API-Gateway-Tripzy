@@ -1,40 +1,70 @@
-# 🔧 Troubleshooting
+# 🔧 Troubleshooting and diagnostics
 
-## There is no server to start
+## 1. Current scaffold limitations
 
-Expected at the current scaffold stage. The manifest points to `index.js`, but that file is absent. No start script exists.
+The repository does not currently contain a running gateway. There is no server entry point, HTTP framework, route registry, authentication middleware, upstream client, or test suite. The npm test script is a placeholder failure. This is expected until implementation work is completed.
 
-## `npm test` fails
+## 2. Installation and package issues
 
-The current test command is a placeholder that exits with code 1. A test framework and suite have not yet been added.
+### Node version mismatch
 
-## Environment variables have no effect
+Check the installed runtime:
 
-The environment example is planning documentation only. No dotenv loader or config validator exists. Add and verify this with the server implementation.
+~~~bash
+node --version
+npm --version
+~~~
 
-## Future upstream 502/503/504
+The package metadata declares Node.js 20 or later. Use a supported Node.js release compatible with the future runtime dependencies.
 
-1. Capture correlation ID and route ID.
-2. Check upstream health and owner status.
-3. Inspect sanitized connection, TLS, timeout and response errors.
-4. Confirm trusted registry and environment configuration.
-5. Check per-service concurrency and circuit status.
-6. Do not expose private hosts or raw exceptions to callers.
+### npm install fails
 
-## Unexpected 401/403
+Check registry connectivity, proxy configuration, lockfile consistency, and package permissions. Do not bypass certificate validation or add unreviewed registry mirrors.
 
-Check issuer, audience, signature key, time, expiry and permission. Never disable verification to work around an authentication incident. Never paste a bearer token into an issue.
+### npm test fails
 
-## Intermittent timeouts
+The current command intentionally exits with an explanatory message because no test files exist. Add the real test suite and update the package script when runtime implementation begins.
 
-Compare gateway and upstream durations, retry counts, queueing, connection reuse, DNS, and downstream latency. Ensure retries are not amplifying outages.
+## 3. There is no server to start
 
-## CORS confusion
+No server source or start script exists in the current tree. Do not invent a PORT value and assume the process is listening. Implement the server and health endpoints before attempting local API calls.
 
-CORS is a browser policy, not API authorization. Non-browser clients can still call a public server. Use authentication, authorization, network controls and rate limiting.
+## 4. Environment variables have no effect
 
-## Safe diagnostic bundle
+The .env.example file is a planning template. No dotenv loader or configuration module currently reads it. Environment variables will have an effect only after validated configuration is implemented.
 
-Include commit SHA, environment, timestamp/timezone, route ID, status, correlation ID, sanitized duration and error code, and relevant configuration key names.
+## 5. Future 401 or 403 responses
 
-Exclude access tokens, cookies, passwords, signing keys, full environment output, private payloads, and internal URLs.
+Check issuer, audience, signing-key ID, signature, token time claims, and permission mapping. Confirm the request reached the intended environment. Do not paste bearer tokens into issues or logs. Never disable token verification as a workaround.
+
+## 6. Future 429 responses
+
+Check the documented quota policy, identity key, window, burst allowance, and retry guidance. Ensure client retries include backoff and do not amplify load. Do not increase quotas during an incident without service-owner review.
+
+## 7. Future 502, 503, or 504 responses
+
+1. Capture route ID, safe error code, and correlation ID.
+2. Check upstream health and service owner status.
+3. Inspect sanitized connection, TLS, timeout, and response diagnostics.
+4. Confirm the trusted route registry and environment configuration.
+5. Check per-service concurrency and circuit state.
+6. Avoid increasing retries during an outage.
+7. Never expose private hosts or raw exceptions to callers.
+
+## 8. Intermittent timeouts
+
+Compare gateway and upstream durations, queueing, connection reuse, DNS behavior, retry count, and downstream latency. Check whether the client deadline is shorter than the gateway budget. Ensure cancellation propagates when requests expire.
+
+## 9. CORS confusion
+
+CORS is a browser-enforced cross-origin policy, not API authentication or authorization. Non-browser clients can still call a public server. Use identity verification, route authorization, network controls, and rate limiting.
+
+## 10. Safe diagnostic bundle
+
+Include commit SHA, environment, timestamp/timezone, route ID, HTTP method, status, correlation ID, sanitized duration, safe error code, runtime version, and relevant configuration key names.
+
+Exclude access tokens, cookies, passwords, signing keys, full environment output, private payloads, customer data, and internal URLs.
+
+## 11. Escalation
+
+For a service-specific failure, contact the verified upstream owner with route ID and redacted correlation evidence. For suspected compromise or data exposure, use the private security reporting process in [SECURITY.md](../SECURITY.md).
