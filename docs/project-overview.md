@@ -2,69 +2,52 @@
 
 ## What this repository is
 
-API Gateway Tripzy is a Node.js repository intended to become a common client-facing entry point for a Tripzy microservices ecosystem. Its current committed state is a package/documentation scaffold, not an operational gateway.
+API Gateway Tripzy is a Node.js project intended to become a controlled client-facing entry point for a Tripzy microservices ecosystem. The current repository is a package and documentation scaffold, not an operational gateway.
 
-## Problem the gateway may solve
+## Problem to address
 
-As a product grows, clients can become coupled to multiple service hostnames, authentication conventions, error formats, and operational policies. A gateway can centralise cross-cutting controls while leaving domain logic with the services that own it.
-
-Potential shared responsibilities:
-- Route matching and API versioning.
-- Identity token verification.
-- Authorization at the boundary.
-- Request size and schema checks.
-- Rate limiting and quotas.
-- Upstream timeouts and bounded retries.
-- Correlation IDs and telemetry.
-- Safe public error normalization.
+As clients interact with multiple services, they can become coupled to different hostnames, authentication conventions, error formats, and reliability behavior. A gateway can centralise cross-cutting controls while leaving domain logic with the service that owns it.
 
 ## Goals
 
-1. Define a secure, explicit boundary between public clients and internal services.
-2. Keep routing and policy configuration reviewable.
-3. Preserve service ownership of domain behavior and persistence.
-4. Make failures observable and predictable.
-5. Establish repeatable tests for routing and security behavior.
+1. Define a secure and explicit public API boundary.
+2. Maintain a reviewed route and upstream registry.
+3. Centralise identity verification, route authorization, rate limits, and request constraints.
+4. Make upstream failure behavior predictable and observable.
+5. Preserve service ownership of business rules and persistence.
+6. Provide repeatable contract, integration, security, and resilience tests.
 
 ## Non-goals
 
-Unless a future product decision explicitly changes the scope, the gateway should not:
-- Reimplement trip, booking, user, payment, or search business logic.
-- Own every microservice's database.
-- Accept arbitrary client-supplied upstream URLs.
+Unless a product decision explicitly changes scope, the gateway should not:
+- Reimplement booking, trip, user, payment, or search domain rules.
+- Connect directly to each microservice database.
+- Accept arbitrary client-provided upstream URLs.
 - Expose internal service discovery details.
 - Become a generic open proxy.
-- Hide partial failures behind misleading success responses.
+- Turn downstream partial failure into misleading success.
 
 ## Current repository evidence
 
-- The package manifest is present.
-- The manifest names a future `index.js` entry point, but the file is absent.
-- No framework, proxy library, auth library, route handlers, or test framework is installed.
-- The package test script is a placeholder which exits with code 1.
-- The environment example contains only proposed values.
-- Existing docs describe intent, not runtime behavior.
+- A root package manifest exists.
+- The manifest points at a future `index.js`, but that file is absent.
+- No HTTP framework or proxy/auth dependencies are installed.
+- No route handlers or upstream destinations are configured.
+- The current test script is a placeholder that exits with an error.
+- The environment example contains suggested names only.
+- Existing project docs do not prove that runtime features exist.
 
 ## Actors
 
 | Actor | Expected interaction |
 |---|---|
-| Web client | Calls public versioned gateway routes |
-| Mobile client | Calls the same stable API boundary where appropriate |
-| Partner client | Calls explicitly exposed and authorized integration routes |
-| Identity provider | Issues or verifies identities/tokens |
-| Upstream service | Owns domain-specific operations |
-| Platform operator | Configures, deploys, monitors and recovers gateway instances |
-| Security reviewer | Reviews boundaries, permissions, abuse controls and secret handling |
+| Web/mobile client | Uses stable public API routes |
+| Partner integration | Uses explicitly exposed and authorized endpoints |
+| Identity provider | Issues/verifies identity credentials |
+| Upstream service | Owns domain operations and records |
+| Platform operator | Configures, deploys, monitors and recovers gateway |
+| Security reviewer | Reviews auth, route boundaries and abuse controls |
 
-## Success measures to define before release
+## Success measures to define
 
-- Route availability and latency percentiles.
-- Upstream timeout and error rates.
-- Authentication and authorization rejection rates.
-- Rate limit rejection behavior.
-- Correlation coverage across gateway and upstream logs.
-- Contract compatibility across service releases.
-- No unintended exposure of internal endpoints or sensitive headers.
-
-Numerical targets must be approved from product traffic and reliability needs; this repository does not define invented SLO values.
+Candidate measures include request success ratio, p95/p99 latency, upstream timeouts, auth/authorization rejection rates, rate-limit correctness, trace propagation coverage, and API compatibility. Numeric targets must be agreed with product and service owners, not invented in this repository.
