@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
+  <title id="title">API Gateway Tripzy</title>
+  <desc id="desc">Abstract network gateway illustration with a central routing hub connected to distributed service nodes.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#081426"/><stop offset=".55" stop-color="#102b4d"/><stop offset="1" stop-color="#172554"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset=".55" stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17375e"/><stop offset="1" stop-color="#10213b"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="9" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse"><path d="M42 0H0V42" fill="none" stroke="#93c5fd" stroke-opacity=".08" stroke-width="1"/></pattern>
+  </defs>
+  <rect width="1600" height="520" rx="30" fill="url(#bg)"/>
+  <rect width="1600" height="520" rx="30" fill="url(#grid)"/>
+  <circle cx="1320" cy="120" r="240" fill="#6366f1" opacity=".08"/>
+  <circle cx="260" cy="500" r="300" fill="#06b6d4" opacity=".08"/>
+  <g fill="none" stroke="url(#accent)" stroke-width="4" stroke-linecap="round" opacity=".85">
+    <path d="M970 250H1110L1190 150H1320"/>
+    <path d="M970 250H1120L1210 250H1380"/>
+    <path d="M970 250H1110L1190 350H1320"/>
+    <path d="M700 250H570L490 150H360"/>
+    <path d="M700 250H570L490 350H360"/>
+  </g>
+  <g filter="url(#glow)">
+    <rect x="700" y="170" width="270" height="160" rx="28" fill="url(#card)" stroke="url(#accent)" stroke-width="3"/>
+    <path d="M810 212h50l35 38-35 38h-50l-35-38z" fill="none" stroke="#67e8f9" stroke-width="5"/>
+    <path d="M825 250h42m-15-15 15 15-15 15" fill="none" stroke="#c4b5fd" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g fill="url(#card)" stroke="#60a5fa" stroke-width="2.5">
+    <rect x="180" y="105" width="180" height="90" rx="18"/>
+    <rect x="180" y="305" width="180" height="90" rx="18"/>
+    <rect x="1320" y="105" width="180" height="90" rx="18"/>
+    <rect x="1380" y="205" width="140" height="90" rx="18"/>
+    <rect x="1320" y="305" width="180" height="90" rx="18"/>
+  </g>
+  <g fill="#e0f2fe" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="600" text-anchor="middle">
+    <text x="270" y="157">CLIENT APPS</text><text x="270" y="357">PARTNERS</text>
+    <text x="1410" y="157">SERVICE A</text><text x="1450" y="257">SERVICE B</text><text x="1410" y="357">SERVICE C</text>
+  </g>
+  <g fill="#67e8f9">
+    <circle cx="490" cy="150" r="8"/><circle cx="490" cy="350" r="8"/>
+    <circle cx="1190" cy="150" r="8"/><circle cx="1210" cy="250" r="8"/><circle cx="1190" cy="350" r="8"/>
+  </g>
+  <text x="92" y="86" fill="#67e8f9" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="5">TRIPZY PLATFORM ENGINEERING</text>
+  <text x="92" y="250" fill="#ffffff" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="54" font-weight="800">API GATEWAY</text>
+  <text x="92" y="306" fill="#c7d2fe" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="27" font-weight="500">One controlled entry point.</text>
+  <text x="92" y="345" fill="#c7d2fe" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="27" font-weight="500">Explicit contracts. Observable boundaries.</text>
+  <text x="92" y="454" fill="#94a3b8" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" letter-spacing="2">ARCHITECTURE FOUNDATION · NODE.JS · MICROSERVICES</text>
+</svg>
