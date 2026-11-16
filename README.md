@@ -156,6 +156,8 @@ The gateway should not become:
 
 The diagram below is the proposed logical topology. The three upstream nodes are illustrative placeholders, not actual configured Tripzy services.
 
+<p align="center"><img src="assets/diagrams/gateway-architecture.svg" alt="Proposed API Gateway Tripzy architecture showing client, edge, gateway policies, approved upstream services, and telemetry" width="100%" /></p>
+
 ~~~mermaid
 flowchart TB
     Client["Web / Mobile / Partner Clients"]
@@ -241,6 +243,8 @@ sequenceDiagram
 ~~~
 
 ## 🧭 Routing decision flow
+
+<p align="center"><img src="assets/illustrations/request-security-flow.svg" alt="Proposed request security pipeline: validation, authentication, authorization, quota, trusted routing, and safe response" width="100%" /></p>
 
 ~~~mermaid
 flowchart TD
