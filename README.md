@@ -252,6 +252,17 @@ sequenceDiagram
     end
 ~~~
 
+## 🖼️ Visual assets and diagrams
+
+The README includes original SVG artwork for the repository banner, proposed gateway architecture, and secure request-processing flow. Editable Mermaid sources are maintained separately so contributors can change the diagrams rather than editing a flattened image.
+
+- [Visual asset inventory](assets/README.md)
+- [Architecture illustration](assets/diagrams/gateway-architecture.svg)
+- [Request security illustration](assets/illustrations/request-security-flow.svg)
+- [Editable Mermaid diagram catalogue](docs/diagrams/README.md)
+
+There are no application screenshots because no running gateway or user interface exists yet. The visuals are explicitly labelled as proposed architecture, not product screenshots.
+
 ## 🧭 Routing decision flow
 
 <p align="center"><img src="assets/illustrations/request-security-flow.svg" alt="Proposed request security pipeline: validation, authentication, authorization, quota, trusted routing, and safe response" width="100%" /></p>
