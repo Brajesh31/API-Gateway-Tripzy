@@ -1,0 +1,14 @@
+flowchart LR
+  Client[Client request] -->|method, path, headers, body| Boundary[Gateway boundary]
+  Boundary --> Validate[Request validation]
+  Validate --> Context[Trusted request context]
+  Context --> Auth[Verified identity claims]
+  Auth --> Policy[Route policy and quota]
+  Policy --> Registry[Trusted route registry]
+  Registry --> Upstream[Approved service]
+  Upstream -->|response| Filter[Response/header filtering]
+  Filter --> Public[Public response]
+  Context -. correlation metadata .-> Logs[Redacted logs]
+  Policy -. decision code .-> Metrics[Metrics]
+  Upstream -. service ID and duration .-> Traces[Trace spans]
+  Filter -. status and latency .-> Metrics
