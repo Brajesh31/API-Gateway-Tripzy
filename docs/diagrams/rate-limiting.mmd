@@ -1,0 +1,12 @@
+flowchart TD
+  A[Authenticated or anonymous request] --> B[Resolve trusted quota identity]
+  B --> C[Load route quota policy]
+  C --> D[Check rate window]
+  D --> E{Within request rate?}
+  E -->|No| R429[429 Rate limited]
+  E -->|Yes| F[Check concurrent request budget]
+  F --> G{Capacity available?}
+  G -->|No| R503[503 or documented capacity response]
+  G -->|Yes| H[Reserve slot and forward]
+  H --> I[Release slot on completion]
+  I --> J[Record aggregate quota metrics]
