@@ -2,62 +2,46 @@
 
 ## Current status
 
-The repository has a small `.env.example`, but no application code loads or validates these variables yet. The names below are proposed configuration contracts, not runtime-verified settings.
+The root environment example contains proposed names. No environment loader or validation code exists yet.
 
-## Configuration principles
+## Principles
 
-- Keep application configuration external to source code.
-- Validate required values at startup.
-- Fail startup when mandatory secrets or upstream definitions are missing.
-- Separate development, staging, and production values.
-- Keep secrets in the hosting platform's secret manager.
-- Never print the complete environment to logs.
-- Treat frontend-exposed variables as public.
-- Prefer immutable, reviewed route configuration over user-controlled destinations.
+- Keep configuration external to source code.
+- Validate mandatory settings once at startup.
+- Fail startup when security-critical configuration is missing or invalid.
+- Separate local, CI, staging and production environments.
+- Use a hosting secret manager for credentials.
+- Never print the full environment.
+- Treat browser-exposed variables as public.
+- Keep route destinations in reviewed configuration, not request data.
 
-## Proposed configuration inventory
+## Proposed variable inventory
 
 | Variable | Purpose | Secret? | Status |
 |---|---|---:|---|
-| `PORT` | HTTP listener port | No | Example only |
-| `LOG_LEVEL` | Logging verbosity | No | Example only |
-| `UPSTREAM_*_URL` | Approved upstream base URL | Usually no, still internal | Not configured |
-| `JWT_ISSUER` | Expected token issuer | No | Not configured |
-| `JWT_AUDIENCE` | Expected token audience | No | Not configured |
-| `JWT_JWKS_URI` | Trusted key endpoint | No, but integrity-critical | Not configured |
-| `RATE_LIMIT_STORE_URL` | Distributed quota storage | May contain credentials | Not configured |
-| `*_TIMEOUT_MS` | Service deadline | No | Not configured |
+| `PORT` | Gateway listener | No | Example only |
+| `LOG_LEVEL` | Log verbosity | No | Example only |
+| `UPSTREAM_*_URL` | Approved destinations | Internal detail | Not configured |
+| `JWT_ISSUER` | Expected issuer | No | Not configured |
+| `JWT_AUDIENCE` | Expected audience | No | Not configured |
+| `JWT_JWKS_URI` | Trusted signing-key endpoint | Integrity-critical | Not configured |
+| `RATE_LIMIT_STORE_URL` | Shared quota store | May contain credentials | Not configured |
+| `*_TIMEOUT_MS` | Per-service deadline | No | Not configured |
 
-Do not add a variable until a runtime consumer, validation rule, and documentation entry exist.
+Do not add variables without a runtime consumer, validation rule and docs entry.
 
-## Secret handling
+## Secret examples
 
-Examples of secrets:
-- JWT signing private keys.
-- Client secrets.
-- Service-to-service credentials.
-- Redis/database passwords when a shared store is adopted.
-- Webhook signing secrets.
-
-Use a managed secret store and least-privilege credentials. Rotate secrets on a documented schedule and immediately after exposure. Keep only placeholders in `.env.example`.
+Secrets include JWT signing keys, client secrets, service credentials, shared-store passwords, and webhook secrets. Store them in a manager, use least privilege, and rotate immediately after exposure. Keep only placeholders in Git.
 
 ## Token verification requirements
 
-Before accepting JWTs, define:
-- Issuer and audience.
-- Allowed algorithm list.
-- Trusted key source and key rotation behavior.
-- Token expiration and not-before policy.
-- Clock-skew tolerance.
-- Required claims and permission mapping.
-- Revocation or short-lived token strategy.
-
-Never trust the `alg` header to choose an arbitrary verification algorithm. Do not decode a JWT and treat unverified claims as identity.
+Define trusted issuer, audience, algorithm allowlist, key source/rotation, expiry/not-before, clock skew, required claims, permission mapping, and revocation strategy. Never treat decoded but unverified JWT claims as identity.
 
 ## Upstream URL validation
 
-The service registry must validate destination scheme, hostname, port, and route path. Reject arbitrary client-provided URLs, userinfo credentials in URLs, unexpected redirects, and disallowed address ranges. Keep upstream DNS/network policy under deployment control.
+Validate URL scheme, hostname, port, path, resolved IP range and redirects. Reject arbitrary destinations, userinfo credentials in URLs, and unapproved address ranges. Network policy should reinforce application allowlists.
 
-## Safe local setup
+## Local setup
 
-A future application may use a dotenv loader, but that dependency is not currently installed. Do not assume `npm start` loads `.env`. Add and test environment loading as part of the server implementation.
+A dotenv dependency is not installed. Copying `.env.example` to `.env` currently has no runtime effect. Add and test environment loading alongside server startup.
