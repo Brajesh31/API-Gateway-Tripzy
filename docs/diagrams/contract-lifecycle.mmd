@@ -1,0 +1,12 @@
+stateDiagram-v2
+  [*] --> Proposed
+  Proposed --> OwnerReview
+  OwnerReview --> SecurityReview
+  SecurityReview --> ContractTesting
+  ContractTesting --> Approved
+  ContractTesting --> ChangesRequested
+  ChangesRequested --> Proposed
+  Approved --> Active
+  Active --> Deprecated
+  Deprecated --> Retired
+  Retired --> [*]
