@@ -1,48 +1,37 @@
 # 🔌 API contract and conventions
 
-## Implementation status
+## Current status
 
-No public API endpoint is implemented in this repository. The package's expected `index.js` file does not exist. The routes below are design guidance only.
+No public API route is implemented. The expected package entry point does not exist, and there are no route handlers.
 
-## Route register requirements
+## Route contract requirements
 
-Every route must be registered explicitly and reviewed with its owning service. Each route entry must declare:
+Each route needs:
+- Stable route ID.
+- Public path, method, and API version.
+- Owning Tripzy service and owner.
+- Trusted upstream service identifier/path.
+- Authentication mode and required permissions.
+- Request/response schemas and payload limits.
+- Status/error mapping.
+- Timeout and retry policy.
+- Idempotency requirements.
+- Rate-limit group.
+- Contract/integration test reference.
 
-| Field | Meaning |
-|---|---|
-| Route ID | Stable internal identifier |
-| Public path | Versioned client-facing path |
-| Methods | Exact allowed HTTP methods |
-| Upstream ID | Key from trusted service configuration |
-| Authentication | Required, optional, or public with rationale |
-| Permission | Explicit required scope/role/policy |
-| Request contract | Content type, schema, size limit |
-| Response contract | Public response envelope and data schema |
-| Timeout | Per-service request deadline |
-| Retry | Allowed methods/statuses and idempotency behavior |
-| Rate limit | Client/user quota group |
-| Owner | Service/team responsible for domain operation |
+## Proposed route register
 
-## Proposed route shape
+No real routes are registered. Use the [service contract register](./service-contracts.md) before implementing any endpoint. Generic examples are not proof of existing services.
 
-Do not copy this into production without matching it to actual Tripzy contracts.
+## HTTP semantics
 
-| Public route example | Owning service | Status |
-|---|---|---|
-| `GET /api/v1/example` | Undecided | Illustration only |
+- GET and HEAD should be safe and read-only.
+- POST should not be automatically retried.
+- PUT may be retried only if the owning contract guarantees idempotency.
+- PATCH retry behavior must be explicit.
+- DELETE may have downstream side effects and requires service-owner confirmation.
 
-## HTTP method semantics
-
-- GET: read-only and safe by contract.
-- HEAD: same resource metadata semantics as GET where supported.
-- POST: create/command; do not automatically retry.
-- PUT: full replacement and idempotent only when service contract guarantees it.
-- PATCH: partial update; retry safety must be explicitly documented.
-- DELETE: potentially idempotent at HTTP semantics level, but downstream side effects must be reviewed.
-
-## Public error envelope
-
-A stable public format should avoid exposing raw upstream bodies:
+## Proposed public error envelope
 
 ```json
 {
@@ -54,45 +43,44 @@ A stable public format should avoid exposing raw upstream bodies:
 }
 ```
 
-This is a proposed shape. Exact fields and status mapping must be adopted consistently before routes are released.
+This is a proposed contract, not an implemented response.
 
 ## Status code conventions
 
 | Status | Intended use |
 |---|---|
-| 200 | Successful request with response body |
+| 200 | Success with response body |
 | 201 | Resource created |
-| 202 | Accepted for asynchronous processing |
-| 204 | Successful operation without response body |
-| 400 | Malformed request or invalid path/query |
+| 202 | Asynchronous operation accepted |
+| 204 | Success without response body |
+| 400 | Malformed input |
 | 401 | Missing or invalid authentication |
-| 403 | Authenticated caller lacks permission |
-| 404 | Unknown public route or resource |
-| 409 | Domain conflict from upstream |
-| 413 | Request body exceeds configured limit |
-| 422 | Syntactically valid but semantically invalid data |
+| 403 | Insufficient permission |
+| 404 | Unknown route/resource |
+| 409 | Domain conflict |
+| 413 | Request too large |
+| 422 | Semantically invalid input |
 | 429 | Rate limit exceeded |
+| 500 | Gateway internal failure |
 | 502 | Invalid or failed upstream response |
-| 503 | Gateway or dependency temporarily unavailable |
+| 503 | Dependency unavailable |
 | 504 | Upstream deadline exceeded |
 
 ## Header policy
 
-Never forward all incoming headers blindly. Create an explicit allowlist. Remove hop-by-hop headers and untrusted identity headers. Set gateway-owned correlation and forwarding headers only after validating the request context. Do not forward client-supplied `X-User-Id`, `X-Role`, or similar claims as authoritative identity.
+Never forward every incoming header. Allowlist required values, remove hop-by-hop headers, ignore client-supplied identity claims, and create gateway-owned request/correlation metadata only after validation. Do not blindly forward cookies.
 
 ## Versioning
 
-Prefer explicit versioned paths or a clearly documented media-type strategy. Define deprecation windows and compatibility guarantees with service owners. Do not silently route an old public contract to a breaking upstream version.
+Prefer explicit versioned paths or a documented media-type strategy. Define deprecation windows and compatibility expectations with owning teams. Do not silently route a stable public contract to a breaking upstream version.
 
 ## Contract review checklist
 
-- [ ] Owner and service contract confirmed.
+- [ ] Service owner and contract confirmed.
 - [ ] Method/path/version approved.
-- [ ] Authentication and permission requirements written.
-- [ ] Request and response schemas documented.
-- [ ] Payload limits defined.
-- [ ] Timeout and retry policy reviewed.
-- [ ] Idempotency behavior stated.
-- [ ] Error mapping defined.
-- [ ] Rate-limit group assigned.
-- [ ] Contract and negative tests added.
+- [ ] Authentication and permission documented.
+- [ ] Request/response schemas documented.
+- [ ] Payload and response limits set.
+- [ ] Timeout/retry/idempotency reviewed.
+- [ ] Error mapping and rate quota defined.
+- [ ] Unit, contract and negative tests added.
